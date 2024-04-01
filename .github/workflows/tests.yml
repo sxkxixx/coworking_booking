@@ -1,0 +1,40 @@
+name: CI Tests workflow
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - "3.10"
+
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Poetry env
+        uses: snok/install-poetry@v1
+
+      - name: Installing Dependencies
+        run: |
+          cd src/
+          poetry install
+
+      - name: Run tests
+        run: |
+          cd src/
+          poetry run pytest
+
+
+
