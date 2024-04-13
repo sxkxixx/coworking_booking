@@ -1,0 +1,38 @@
+from datetime import timedelta
+
+import dotenv
+from pydantic import computed_field
+from pydantic_settings import BaseSettings
+
+dotenv.load_dotenv('.env')
+
+EMAIL_DOMAINS = ['urfu.me', 'urfu.ru']
+
+
+class DatabaseSettings(BaseSettings):
+    DATABASE_USER: str
+    DATABASE_PASSWORD: str
+    DATABASE_HOST: str
+    DATABASE_PORT: str
+    DATABASE_NAME: str
+
+
+class RedisSettings(BaseSettings):
+    REDIS_HOST: str
+    REDIS_PORT: int
+
+
+class ApplicationSettings(BaseSettings):
+    SECRET_KEY: str
+    ACCESS_TOKEN_TTL_MINUTES: int
+    SESSION_TTL_DAYS: int
+
+    @computed_field
+    @property
+    def access_token_ttl(self) -> timedelta:
+        return timedelta(minutes=self.ACCESS_TOKEN_TTL_MINUTES)
+
+    @computed_field
+    @property
+    def session_ttl(self) -> timedelta:
+        return timedelta(days=self.SESSION_TTL_DAYS)
