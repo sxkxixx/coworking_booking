@@ -35,3 +35,6 @@ class RedisSessionRepository(SessionRepository):
     @staticmethod
     def __get_random_id() -> str:
         return os.urandom(24).hex()
+
+    async def delete(self, session_id: str) -> None:
+        await self.__redis.delete(session_id)

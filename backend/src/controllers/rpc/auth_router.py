@@ -2,17 +2,17 @@ from datetime import datetime
 from typing import Optional
 
 import fastapi_jsonrpc as jsonrpc
-from fastapi import Response
+from fastapi import Response, Request
 from peewee import IntegrityError
 
-from common.dto.user import UserCreateDTO, UserResponseDTO, Login, SessionResponse
+from common.dto.user import UserCreateDTO, UserResponseDTO, Login, TokenResponse
 from common.hasher import Hasher
 from common.session import TokenService, Session
 from infrastructure.database import User
 from storage.session.session_repository import SessionRepository
 from storage.user.abstract_user_repository import AbstractUserRepository
 from .abstract_rpc_router import AbstractRPCRouter
-from .exceptions import RegisterError, AuthenticationError
+from .exceptions import RegisterError, AuthenticationError, SessionError
 
 
 def parse_email_to_user_id(email: str) -> str:
@@ -41,6 +41,7 @@ class AuthRouter(AbstractRPCRouter):
         entrypoint = jsonrpc.Entrypoint(path='/api/v1/auth', tags=['AUTH'])
         entrypoint.add_method_route(self.register)
         entrypoint.add_method_route(self.login)
+        entrypoint.add_method_route(self.refresh_session)
         return entrypoint
 
     async def register(self, data: UserCreateDTO) -> UserResponseDTO:
@@ -58,7 +59,7 @@ class AuthRouter(AbstractRPCRouter):
             raise RegisterError(data='User with current email already exists')
         return user
 
-    async def login(self, data: Login, response: Response) -> SessionResponse:
+    async def login(self, data: Login, response: Response) -> TokenResponse:
         user: Optional[User] = await self.user_repository.get(User.email == data.email)
         if not user:
             raise AuthenticationError()
@@ -74,4 +75,49 @@ class AuthRouter(AbstractRPCRouter):
             path='/api/v1/auth',
             expires=datetime.utcnow() + self.session_repository.session_ttl
         )
-        return SessionResponse(access_token=access_token)
+        return TokenResponse(access_token=access_token)
+
+    async def refresh_session(
+            self,
+            fingerprint: str,
+            request: Request,
+            response: Response
+    ) -> TokenResponse:
+        session_id: Optional[str] = request.cookies.get('refresh_token')
+        if session_id:
+            raise SessionError()
+        session: Optional[Session] = await self.session_repository.get(session_id)
+        response.delete_cookie('refresh_token')
+        if not session:
+            raise SessionError()
+        await self.session_repository.delete(session_id)
+        if fingerprint != session.fingerprint:
+            raise SessionError()
+        user: Optional[User] = await self.user_repository.get(User.email == session.email)
+        if not user:
+            raise SessionError()
+        assert session.fingerprint == fingerprint
+        new_access_token: str = self.token_service.get_access_token(user)
+        new_session = Session(user_id=user.id, email=user.email, fingerprint=fingerprint)
+        session_id: str = await self.session_repository.setex(new_session)
+        response.set_cookie(
+            key='refresh_token',
+            value=session_id,
+            httponly=True,
+            path='/api/v1/auth',
+            expires=datetime.utcnow() + self.session_repository.session_ttl
+        )
+        return TokenResponse(access_token=new_access_token)
+
+    async def logout(self, fingerprint: str, request: Request, response: Response) -> None:
+        session_id: Optional[str] = request.cookies.get('refresh_token')
+        if not session_id:
+            raise SessionError()
+        response.delete_cookie('refresh_token')
+        session: Optional[Session] = await self.session_repository.get(session_id)
+        if not session:
+            raise SessionError()
+        if session.fingerprint != fingerprint:
+            raise SessionError()
+        await self.session_repository.delete(session_id)
+        return None

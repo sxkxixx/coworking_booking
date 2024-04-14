@@ -53,6 +53,6 @@ class Login(BaseModel):
         raise ValueError('Incorrect email domain')
 
 
-class SessionResponse(BaseModel):
+class TokenResponse(BaseModel):
     access_token: str
     token_header: str = 'Authorization'

@@ -18,3 +18,7 @@ class SessionRepository(ABC):
     @abstractmethod
     def session_ttl(self) -> timedelta:
         raise NotImplementedError()
+
+    @abstractmethod
+    async def delete(self, session_id) -> None:
+        raise NotImplementedError()
