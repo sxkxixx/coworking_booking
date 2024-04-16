@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional
 
 import fastapi_jsonrpc as jsonrpc
@@ -8,6 +7,7 @@ from peewee import IntegrityError
 from common.dto.user import UserCreateDTO, UserResponseDTO, Login, TokenResponse
 from common.hasher import Hasher
 from common.session import TokenService, Session
+from common.utils import utc_with_zone
 from infrastructure.database import User
 from storage.session.session_repository import SessionRepository
 from storage.user.abstract_user_repository import AbstractUserRepository
@@ -73,7 +73,7 @@ class AuthRouter(AbstractRPCRouter):
             value=session_id,
             httponly=True,
             path='/api/v1/auth',
-            expires=datetime.utcnow() + self.session_repository.session_ttl
+            expires=utc_with_zone() + self.session_repository.session_ttl
         )
         return TokenResponse(access_token=access_token)
 
@@ -105,7 +105,7 @@ class AuthRouter(AbstractRPCRouter):
             value=session_id,
             httponly=True,
             path='/api/v1/auth',
-            expires=datetime.utcnow() + self.session_repository.session_ttl
+            expires=utc_with_zone() + self.session_repository.session_ttl
         )
         return TokenResponse(access_token=new_access_token)
 

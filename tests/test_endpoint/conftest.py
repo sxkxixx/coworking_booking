@@ -3,6 +3,7 @@ from typing import Optional, Any, Callable
 import fastapi_jsonrpc as jsonrpc
 import httpx
 import pytest
+import pytest_asyncio
 from aioredis import Redis
 
 from common.hasher import Hasher
@@ -55,3 +56,14 @@ def rpc_request(async_client: httpx.AsyncClient) -> Callable:
         return await async_client.post(url, json=request_body, headers=headers or {})
 
     return inner
+
+
+@pytest_asyncio.fixture(name='registered_user')
+async def create_user(rpc_request: Callable) -> dict:
+    user = {'data': {
+        'email': 'name.surname@urfu.ru', 'password': 'top_secret_test_pwd',
+        'last_name': 'Surname', 'first_name': 'Name',
+        'patronymic': None, 'is_student': True
+    }}
+    response: httpx.Response = await rpc_request(url='/api/v1/auth', method='register', params=user)
+    return response.json()['result']

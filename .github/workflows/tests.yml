@@ -41,9 +41,7 @@ jobs:
         uses: snok/install-poetry@v1
 
       - name: Installing Dependencies
-        run: |
-          cd backend/
-          poetry install
+        run: poetry install
 
       - name: Run tests
         env:
@@ -57,9 +55,7 @@ jobs:
           SECRET_KEY: secret)
           ACCESS_TOKEN_TTL_MINUTES: 60
           SESSION_TTL_DAYS: 60
-        run: |
-          cd backend/
-          make tests
+        run: make tests
 
 
 

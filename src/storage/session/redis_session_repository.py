@@ -30,7 +30,7 @@ class RedisSessionRepository(SessionRepository):
 
     @property
     def session_ttl(self):
-        return self.session_ttl
+        return self.__session_ttl
 
     @staticmethod
     def __get_random_id() -> str:
