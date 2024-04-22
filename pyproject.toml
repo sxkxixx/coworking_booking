@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "src"
+name = "coworking_booking"
 version = "0.1.0"
 description = ""
 authors = ["sxkxixx <sasha.kornilov.1212@gmail.com>"]
@@ -18,6 +18,8 @@ aiopg = "^1.4.0"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 pydantic-settings = "^2.2.1"
 aioredis = "^2.0.1"
+aioboto3 = "^12.4.0"
+python-multipart = "^0.0.9"
 
 
 [tool.poetry.group.dev.dependencies]

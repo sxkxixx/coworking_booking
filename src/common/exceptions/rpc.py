@@ -8,7 +8,7 @@ class RegisterError(BaseError):
 
 class AuthenticationError(BaseError):
     CODE = -32002
-    MESSAGE = 'Incorrect email or password'
+    MESSAGE = 'Invalid credentials'
 
 
 class SessionError(BaseError):

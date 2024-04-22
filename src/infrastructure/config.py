@@ -36,3 +36,11 @@ class ApplicationSettings(BaseSettings):
     @property
     def session_ttl(self) -> timedelta:
         return timedelta(days=self.SESSION_TTL_DAYS)
+
+
+class ObjectStorageSettings(BaseSettings):
+    AWS_ACCESS_KEY_ID: str
+    AWS_SECRET_ACCESS_KEY: str
+    REGION_NAME: str
+    BUCKET_NAME: str
+    S3_ENDPOINT_URL: str

@@ -12,3 +12,7 @@ class AbstractUserRepository(ABC):
     @abstractmethod
     async def get(self, *filters) -> Optional[User]:
         raise NotImplementedError()
+
+    @abstractmethod
+    async def set_avatar(self, user: User, filename: str) -> None:
+        raise NotImplementedError()

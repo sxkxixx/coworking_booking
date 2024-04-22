@@ -17,3 +17,9 @@ class UserRepository(AbstractUserRepository):
     async def get(self, *filters) -> Optional[User]:
         user: Optional[User] = await self.manager.get_or_none(User, *filters)
         return user
+
+    async def set_avatar(self, user: User, filename: str) -> None:
+        await self.manager.execute(
+            User.update({User.avatar_filename: filename})
+            .where(User.id == user.id)
+        )

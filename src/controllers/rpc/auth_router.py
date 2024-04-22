@@ -12,7 +12,7 @@ from infrastructure.database import User
 from storage.session.session_repository import SessionRepository
 from storage.user.abstract_user_repository import AbstractUserRepository
 from .abstract_rpc_router import AbstractRPCRouter
-from .exceptions import RegisterError, AuthenticationError, SessionError
+from common.exceptions.rpc import RegisterError, AuthenticationError, SessionError
 
 
 def parse_email_to_user_id(email: str) -> str:

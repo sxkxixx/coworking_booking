@@ -25,7 +25,7 @@ class User(peewee.Model):
     first_name: str = peewee.CharField(max_length=32, null=False)
     patronymic: Optional[str] = peewee.CharField(max_length=32, null=True)
     is_student: bool = peewee.BooleanField(null=False)
-    avatar_url: Optional[str] = peewee.CharField(max_length=128, null=True)
+    avatar_filename: Optional[str] = peewee.CharField(max_length=128, null=True)
 
     class Meta:
         table_name = 'users'
@@ -46,6 +46,7 @@ class UserTelegramInfo(peewee.Model):
 
 class Coworking(peewee.Model):
     id: str = peewee.CharField(max_length=32, primary_key=True)
+    avatar_filename: str = peewee.CharField(max_length=64)
     title: str = peewee.CharField(max_length=128, null=False)
     institute: str = peewee.CharField(max_length=128, null=False)
     description: str = peewee.CharField(max_length=1024, null=False)
@@ -96,3 +97,11 @@ class Reservation(peewee.Model):
     session_end: datetime.datetime = peewee.DateTimeField(null=False)
     status: BookingStatus = CharEnum(_enum=BookingStatus, default=BookingStatus.NEW, null=False)
     created_at: datetime.datetime = peewee.DateTimeField(default=datetime.datetime.utcnow)
+
+
+class CoworkingImages(peewee.Model):
+    id: int = peewee.IntegerField(primary_key=True)
+    coworking: Coworking = peewee.ForeignKeyField(
+        Coworking, null=False, on_delete=OnDelete.CASCADE.value, backref='images'
+    )
+    image_filename: str = peewee.CharField(max_length=64, null=False)

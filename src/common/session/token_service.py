@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime
+from typing import Any, Optional
 
 from jose import jwt
 
@@ -21,3 +22,9 @@ class TokenService:
         expire = datetime.utcnow() + ttl
         data.update({"exp": expire})
         return jwt.encode(data, self.secret_key, self.ALGORITHM)
+
+    def get_token_payload(self, token: str) -> Optional[dict[str, Any]]:
+        try:
+            return jwt.decode(token, self.secret_key, [self.ALGORITHM])
+        except jwt.JWTError:
+            return None
