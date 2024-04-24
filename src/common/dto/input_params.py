@@ -5,8 +5,8 @@ from pydantic import BaseModel, Field
 
 
 class TimestampRange(BaseModel):
-    from_: datetime = Field(..., validation_alias="from")
-    to_: datetime = Field(..., validation_alias="to")
+    start: datetime = Field(..., validation_alias="from")
+    end: datetime = Field(..., validation_alias="to")
 
 
 class SearchParams(BaseModel):

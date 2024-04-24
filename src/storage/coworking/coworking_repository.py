@@ -44,28 +44,29 @@ class CoworkingRepository(AbstractCoworkingRepository):
             Coworking.select()
             # Фильтрация по времени работы коворкинга
             .join(WorkingSchedule, peewee.JOIN.LEFT_OUTER)
-            .where(WorkingSchedule.week_day == interval.from_.weekday())
+            .where(WorkingSchedule.week_day == interval.start.weekday())
             .where(
-                (WorkingSchedule.start_time <= interval.from_) &
-                (interval.to_ <= WorkingSchedule.end_time)
+                (WorkingSchedule.start_time <= interval.start) &
+                (interval.end <= WorkingSchedule.end_time)
             )
             # Проверка, работает ли коворкинг в указанный день
             .switch(Coworking)
             .join(NonBusinessDay, peewee.JOIN.LEFT_OUTER)
             .where(
                 (NonBusinessDay.day.is_null(True)) |
-                (NonBusinessDay.day != interval.from_.date())
+                (NonBusinessDay.day != interval.start.date())
             )
-            # Проверка, есть ли доступное свободное время
+            # Проверка, есть ли доступное свободное место в указанное время
             .switch(Coworking)
             .join(CoworkingSeat, peewee.JOIN.LEFT_OUTER)
             .join(Reservation, peewee.JOIN.LEFT_OUTER)
             .where(
                 (Reservation.id.is_null(True)) |
-                ((interval.to_ <= Reservation.session_start) &
-                 (interval.from_ >= Reservation.session_end))
-            )
-            # TODO: Допилить запрос
+                (
+                        (Reservation.session_end <= interval.start) |
+                        (Reservation.session_start >= interval.end)
+                )
 
+            )
         )
         return await self.manager.execute(query)
