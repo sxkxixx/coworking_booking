@@ -9,9 +9,11 @@ from common.session import TokenService
 from controllers.middlewares import AuthMiddleware
 from controllers.rest import ImageRouter
 from controllers.rpc.auth_router import AuthRouter
+from controllers.rpc.coworking_router import CoworkingRouter
 from infrastructure.config import ApplicationSettings, RedisSettings, ObjectStorageSettings
 from infrastructure.database.db import manager, database
 from infrastructure.database.models import *
+from storage.coworking import CoworkingRepository
 from storage.s3_repository import S3Repository
 from storage.session import RedisSessionRepository
 from storage.user import UserRepository
@@ -19,7 +21,16 @@ from storage.user import UserRepository
 
 @asynccontextmanager
 async def lifespan(api: jsonrpc.API):
-    models = [User, UserTelegramInfo]
+    models = [
+        User,
+        Coworking,
+        Reservation,
+        CoworkingSeat,
+        NonBusinessDay,
+        CoworkingImages,
+        WorkingSchedule,
+        UserTelegramInfo
+    ]
     with database:
         database.create_tables(models)
     yield
@@ -38,6 +49,7 @@ def _create_app() -> jsonrpc.API:
     # Initialize utils, repositories and etc.
     hasher = Hasher()
     user_repository = UserRepository(manager)
+    coworking_repository = CoworkingRepository(manager)
     session_repository = RedisSessionRepository(redis, application_settings.session_ttl)
     token_service = TokenService(
         application_settings.SECRET_KEY, application_settings.access_token_ttl
@@ -46,6 +58,7 @@ def _create_app() -> jsonrpc.API:
     # Initialize routers
     auth_router = AuthRouter(user_repository, hasher, token_service, session_repository)
     image_router = ImageRouter(user_repository, s3_repository)
+    coworking_router = CoworkingRouter(coworking_repository)
 
     # Middlewares
     auth_middleware = AuthMiddleware(token_service, user_repository)
@@ -53,6 +66,7 @@ def _create_app() -> jsonrpc.API:
     # Create app and register routers
     _app = jsonrpc.API(lifespan=lifespan)
     _app.bind_entrypoint(auth_router.build_entrypoint())
+    _app.bind_entrypoint(coworking_router.build_entrypoint())
     _app.include_router(image_router.build_api_router())
 
     _app.add_middleware(BaseHTTPMiddleware, dispatch=auth_middleware)

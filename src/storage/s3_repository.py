@@ -1,10 +1,12 @@
 import os
+from typing import AsyncGenerator
 
 import aioboto3
 from fastapi import UploadFile
 
 from infrastructure.config import ObjectStorageSettings
 
+CHUNK_SIZE = 16 * 1024
 
 class S3Repository:
     def __init__(self, settings: ObjectStorageSettings):
@@ -27,6 +29,16 @@ class S3Repository:
                 ExpiresIn=86400  # 1 day to cache
             )
         return unique_filename, pre_signed_url
+
+    async def get_file_stream(self, filename: str) -> AsyncGenerator[bytes, None]:
+        async with self.session.client(self.service_name, endpoint_url=self.endpoint) as client:
+            try:
+                response = await client.get_object(Bucket=self.bucket, Key=filename)
+            except BaseException:
+                yield b""
+            else:
+                while bytes_data := await response['Body'].read(CHUNK_SIZE):
+                    yield bytes_data
 
     async def get_presigned_url(self, filename: str) -> str:
         pass

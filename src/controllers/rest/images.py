@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import Optional
 
 from fastapi import APIRouter, File, UploadFile, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 
 from common.context import CONTEXT_USER
 from common.dto.image import ImageUrl
@@ -39,5 +39,6 @@ class ImageRouter:
         await self.user_repository.set_avatar(user, filename)
         return ImageUrl(pre_singed_url=pre_signed_url)
 
-    async def response_image(self, filename: str) -> FileResponse:
-        pass
+    async def response_image(self, filename: str) -> StreamingResponse:
+        """Возвращает поток байтов изображения из S3 хранилища"""
+        return StreamingResponse(self.s3_repository.get_file_stream(filename))

@@ -21,13 +21,13 @@ class PlaceType(enum.Enum):
 class Weekday(enum.Enum):
     """Enum для определения дня недели"""
 
-    MONDAY: str = 'monday'
-    TUESDAY: str = 'tuesday'
-    WEDNESDAY: str = 'wednesday'
-    THURSDAY: str = 'thursday'
-    FRIDAY: str = 'friday'
-    SATURDAY: str = 'saturday'
-    SUNDAY: str = 'sunday'
+    MONDAY: int = 0
+    TUESDAY: int = 1
+    WEDNESDAY: int = 2
+    THURSDAY: int = 3
+    FRIDAY: int = 4
+    SATURDAY: int = 5
+    SUNDAY: int = 6
 
 
 class BookingStatus(enum.Enum):
