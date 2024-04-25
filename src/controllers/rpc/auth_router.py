@@ -42,6 +42,7 @@ class AuthRouter(AbstractRPCRouter):
         entrypoint.add_method_route(self.register)
         entrypoint.add_method_route(self.login)
         entrypoint.add_method_route(self.refresh_session)
+        entrypoint.add_method_route(self.logout)
         return entrypoint
 
     async def register(self, data: UserCreateDTO) -> UserResponseDTO:

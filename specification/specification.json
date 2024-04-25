@@ -1,0 +1,1884 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FastAPI",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/auth": {
+      "post": {
+        "tags": [
+          "AUTH"
+        ],
+        "summary": "Entrypoint",
+        "operationId": "entrypoint_api_v1_auth_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response"
+                }
+              }
+            }
+          },
+          "210": {
+            "description": "[-32602] Invalid params\n\nInvalid method parameter(s)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[InvalidParams]"
+                }
+              }
+            }
+          },
+          "211": {
+            "description": "[-32601] Method not found\n\nThe method does not exist / is not available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[MethodNotFound]"
+                }
+              }
+            }
+          },
+          "212": {
+            "description": "[-32700] Parse error\n\nInvalid JSON was received by the server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[ParseError]"
+                }
+              }
+            }
+          },
+          "213": {
+            "description": "[-32600] Invalid Request\n\nThe JSON sent is not a valid Request object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[InvalidRequest]"
+                }
+              }
+            }
+          },
+          "214": {
+            "description": "[-32603] Internal error\n\nInternal JSON-RPC error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[InternalError]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "AUTH"
+        ],
+        "summary": "Register",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request[register]"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response[register]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "AUTH"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request[login]"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response[login]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh_session": {
+      "post": {
+        "tags": [
+          "AUTH"
+        ],
+        "summary": "Refresh Session",
+        "operationId": "refresh_session_api_v1_auth_refresh_session_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request[refresh_session]"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response[refresh_session]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "AUTH"
+        ],
+        "summary": "Logout",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request[logout]"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response[logout]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/coworking": {
+      "post": {
+        "tags": [
+          "COWORKING"
+        ],
+        "summary": "Entrypoint",
+        "operationId": "entrypoint_api_v1_coworking_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response"
+                }
+              }
+            }
+          },
+          "210": {
+            "description": "[-32602] Invalid params\n\nInvalid method parameter(s)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[InvalidParams]"
+                }
+              }
+            }
+          },
+          "211": {
+            "description": "[-32601] Method not found\n\nThe method does not exist / is not available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[MethodNotFound]"
+                }
+              }
+            }
+          },
+          "212": {
+            "description": "[-32700] Parse error\n\nInvalid JSON was received by the server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[ParseError]"
+                }
+              }
+            }
+          },
+          "213": {
+            "description": "[-32600] Invalid Request\n\nThe JSON sent is not a valid Request object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[InvalidRequest]"
+                }
+              }
+            }
+          },
+          "214": {
+            "description": "[-32603] Internal error\n\nInternal JSON-RPC error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[InternalError]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/coworking/available_coworking_by_timestamp": {
+      "post": {
+        "tags": [
+          "COWORKING"
+        ],
+        "summary": "Available Coworking By Timestamp",
+        "operationId": "available_coworking_by_timestamp_api_v1_coworking_available_coworking_by_timestamp_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request[available_coworking_by_timestamp]"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response[available_coworking_by_timestamp]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/coworking/get_coworking_by_search_params": {
+      "post": {
+        "tags": [
+          "COWORKING"
+        ],
+        "summary": "Get Coworking By Search Params",
+        "description": "Поля title, institute могут быть равны значению null",
+        "operationId": "get_coworking_by_search_params_api_v1_coworking_get_coworking_by_search_params_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request[get_coworking_by_search_params]"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response[get_coworking_by_search_params]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/coworking/get_coworking": {
+      "post": {
+        "tags": [
+          "COWORKING"
+        ],
+        "summary": "Get Coworking",
+        "operationId": "get_coworking_api_v1_coworking_get_coworking_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request[get_coworking]"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response[get_coworking]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/image": {
+      "post": {
+        "tags": [
+          "IMAGE"
+        ],
+        "summary": "Upload Avatar",
+        "operationId": "upload_avatar_api_v1_image_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_avatar_api_v1_image_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageUrl"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/image/{filename}": {
+      "get": {
+        "tags": [
+          "IMAGE"
+        ],
+        "summary": "Response Image",
+        "description": "Возвращает поток байтов изображения из S3 хранилища",
+        "operationId": "response_image_api_v1_image__filename__get",
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Filename"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_upload_avatar_api_v1_image_post": {
+        "properties": {
+          "image": {
+            "type": "string",
+            "format": "binary",
+            "title": "Image"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image"
+        ],
+        "title": "Body_upload_avatar_api_v1_image_post"
+      },
+      "CoworkingDetailDTO": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "avatar": {
+            "type": "string",
+            "title": "Avatar"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "institute": {
+            "type": "string",
+            "title": "Institute"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "address": {
+            "type": "string",
+            "title": "Address"
+          },
+          "seats": {
+            "items": {
+              "$ref": "#/components/schemas/SeatResponseDTO"
+            },
+            "type": "array",
+            "title": "Seats"
+          },
+          "working_schedules": {
+            "items": {
+              "$ref": "#/components/schemas/ScheduleResponseDTO"
+            },
+            "type": "array",
+            "title": "Working Schedules"
+          },
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/CoworkingImageResponse"
+            },
+            "type": "array",
+            "title": "Images"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "avatar",
+          "title",
+          "institute",
+          "description",
+          "address",
+          "seats",
+          "working_schedules",
+          "images"
+        ],
+        "title": "CoworkingDetailDTO"
+      },
+      "CoworkingImageResponse": {
+        "properties": {
+          "image_filename": {
+            "type": "string",
+            "title": "Image Filename"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_filename"
+        ],
+        "title": "CoworkingImageResponse"
+      },
+      "CoworkingResponseDTO": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "avatar": {
+            "type": "string",
+            "title": "Avatar"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "institute": {
+            "type": "string",
+            "title": "Institute"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "address": {
+            "type": "string",
+            "title": "Address"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "avatar",
+          "title",
+          "institute",
+          "description",
+          "address"
+        ],
+        "title": "CoworkingResponseDTO"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ImageUrl": {
+        "properties": {
+          "pre_singed_url": {
+            "type": "string",
+            "title": "Pre Singed Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pre_singed_url"
+        ],
+        "title": "ImageUrl"
+      },
+      "InternalError": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": -32603,
+            "example": -32603
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Internal error",
+            "example": "Internal error"
+          }
+        },
+        "type": "object",
+        "title": "InternalError"
+      },
+      "InvalidParams": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": -32602,
+            "example": -32602
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Invalid params",
+            "example": "Invalid params"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/_ErrorData[_Error]"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "InvalidParams"
+      },
+      "InvalidRequest": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": -32600,
+            "example": -32600
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Invalid Request",
+            "example": "Invalid Request"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/_ErrorData[_Error]"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "InvalidRequest"
+      },
+      "Login": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "fingerprint": {
+            "type": "string",
+            "title": "Fingerprint"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "fingerprint"
+        ],
+        "title": "Login"
+      },
+      "MethodNotFound": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": -32601,
+            "example": -32601
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Method not found",
+            "example": "Method not found"
+          }
+        },
+        "type": "object",
+        "title": "MethodNotFound"
+      },
+      "ParseError": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": -32700,
+            "example": -32700
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Parse error",
+            "example": "Parse error"
+          }
+        },
+        "type": "object",
+        "title": "ParseError"
+      },
+      "ScheduleResponseDTO": {
+        "properties": {
+          "coworking_id": {
+            "type": "integer",
+            "title": "Coworking Id"
+          },
+          "week_day": {
+            "type": "string",
+            "title": "Week Day"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "time",
+            "title": "Start Time"
+          },
+          "end_time": {
+            "type": "string",
+            "format": "time",
+            "title": "End Time"
+          },
+          "is_weekend": {
+            "type": "boolean",
+            "title": "Is Weekend"
+          }
+        },
+        "type": "object",
+        "required": [
+          "coworking_id",
+          "week_day",
+          "start_time",
+          "end_time",
+          "is_weekend"
+        ],
+        "title": "ScheduleResponseDTO"
+      },
+      "SearchParams": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "institute": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Institute"
+          }
+        },
+        "type": "object",
+        "title": "SearchParams"
+      },
+      "SeatResponseDTO": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "coworking_id": {
+            "type": "string",
+            "title": "Coworking Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "place_type": {
+            "type": "string",
+            "title": "Place Type"
+          },
+          "seats_count": {
+            "type": "integer",
+            "title": "Seats Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "coworking_id",
+          "label",
+          "description",
+          "place_type",
+          "seats_count"
+        ],
+        "title": "SeatResponseDTO"
+      },
+      "TimestampRange": {
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "title": "From"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time",
+            "title": "To"
+          }
+        },
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "title": "TimestampRange"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_header": {
+            "type": "string",
+            "title": "Token Header",
+            "default": "Authorization"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token"
+        ],
+        "title": "TokenResponse"
+      },
+      "UserCreateDTO": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name"
+          },
+          "patronymic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patronymic"
+          },
+          "is_student": {
+            "type": "boolean",
+            "title": "Is Student"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "last_name",
+          "first_name",
+          "is_student"
+        ],
+        "title": "UserCreateDTO"
+      },
+      "UserResponseDTO": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name"
+          },
+          "patronymic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patronymic"
+          },
+          "is_student": {
+            "type": "boolean",
+            "title": "Is Student"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "last_name",
+          "first_name",
+          "is_student"
+        ],
+        "title": "UserResponseDTO"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "_Error": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Loc"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Msg"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "ctx": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ctx"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "_Error"
+      },
+      "_ErrorData[_Error]": {
+        "properties": {
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/_Error"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "_ErrorData[_Error]"
+      },
+      "_ErrorResponse[InternalError]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "error": {
+            "$ref": "#/components/schemas/InternalError"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "_ErrorResponse[InternalError]"
+      },
+      "_ErrorResponse[InvalidParams]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "error": {
+            "$ref": "#/components/schemas/InvalidParams"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "_ErrorResponse[InvalidParams]"
+      },
+      "_ErrorResponse[InvalidRequest]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "error": {
+            "$ref": "#/components/schemas/InvalidRequest"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "_ErrorResponse[InvalidRequest]"
+      },
+      "_ErrorResponse[MethodNotFound]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "error": {
+            "$ref": "#/components/schemas/MethodNotFound"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "_ErrorResponse[MethodNotFound]"
+      },
+      "_ErrorResponse[ParseError]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "error": {
+            "$ref": "#/components/schemas/ParseError"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "_ErrorResponse[ParseError]"
+      },
+      "_Params[available_coworking_by_timestamp]": {
+        "properties": {
+          "interval": {
+            "$ref": "#/components/schemas/TimestampRange"
+          }
+        },
+        "type": "object",
+        "required": [
+          "interval"
+        ],
+        "title": "_Params[available_coworking_by_timestamp]"
+      },
+      "_Params[get_coworking]": {
+        "properties": {
+          "coworking_id": {
+            "type": "string",
+            "title": "Coworking Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "coworking_id"
+        ],
+        "title": "_Params[get_coworking]"
+      },
+      "_Params[get_coworking_by_search_params]": {
+        "properties": {
+          "search": {
+            "$ref": "#/components/schemas/SearchParams"
+          }
+        },
+        "type": "object",
+        "required": [
+          "search"
+        ],
+        "title": "_Params[get_coworking_by_search_params]"
+      },
+      "_Params[login]": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Login"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "_Params[login]"
+      },
+      "_Params[logout]": {
+        "properties": {
+          "fingerprint": {
+            "type": "string",
+            "title": "Fingerprint"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fingerprint"
+        ],
+        "title": "_Params[logout]"
+      },
+      "_Params[refresh_session]": {
+        "properties": {
+          "fingerprint": {
+            "type": "string",
+            "title": "Fingerprint"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fingerprint"
+        ],
+        "title": "_Params[refresh_session]"
+      },
+      "_Params[register]": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/UserCreateDTO"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "_Params[register]"
+      },
+      "_Request": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "method": {
+            "type": "string",
+            "title": "Method"
+          },
+          "params": {
+            "type": "object",
+            "title": "Params"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "method"
+        ],
+        "title": "_Request"
+      },
+      "_Request[available_coworking_by_timestamp]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "default": "available_coworking_by_timestamp",
+            "example": "available_coworking_by_timestamp"
+          },
+          "params": {
+            "$ref": "#/components/schemas/_Params[available_coworking_by_timestamp]"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "params"
+        ],
+        "title": "_Request[available_coworking_by_timestamp]"
+      },
+      "_Request[get_coworking]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "default": "get_coworking",
+            "example": "get_coworking"
+          },
+          "params": {
+            "$ref": "#/components/schemas/_Params[get_coworking]"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "params"
+        ],
+        "title": "_Request[get_coworking]"
+      },
+      "_Request[get_coworking_by_search_params]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "default": "get_coworking_by_search_params",
+            "example": "get_coworking_by_search_params"
+          },
+          "params": {
+            "$ref": "#/components/schemas/_Params[get_coworking_by_search_params]"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "params"
+        ],
+        "title": "_Request[get_coworking_by_search_params]"
+      },
+      "_Request[login]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "default": "login",
+            "example": "login"
+          },
+          "params": {
+            "$ref": "#/components/schemas/_Params[login]"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "params"
+        ],
+        "title": "_Request[login]"
+      },
+      "_Request[logout]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "default": "logout",
+            "example": "logout"
+          },
+          "params": {
+            "$ref": "#/components/schemas/_Params[logout]"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "params"
+        ],
+        "title": "_Request[logout]"
+      },
+      "_Request[refresh_session]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "default": "refresh_session",
+            "example": "refresh_session"
+          },
+          "params": {
+            "$ref": "#/components/schemas/_Params[refresh_session]"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "params"
+        ],
+        "title": "_Request[refresh_session]"
+      },
+      "_Request[register]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "default": "register",
+            "example": "register"
+          },
+          "params": {
+            "$ref": "#/components/schemas/_Params[register]"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "params"
+        ],
+        "title": "_Request[register]"
+      },
+      "_Response": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "result": {
+            "type": "object",
+            "title": "Result"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "id",
+          "result"
+        ],
+        "title": "_Response"
+      },
+      "_Response[available_coworking_by_timestamp]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "result": {
+            "items": {
+              "$ref": "#/components/schemas/CoworkingResponseDTO"
+            },
+            "type": "array",
+            "title": "Result"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "id",
+          "result"
+        ],
+        "title": "_Response[available_coworking_by_timestamp]"
+      },
+      "_Response[get_coworking]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "result": {
+            "$ref": "#/components/schemas/CoworkingDetailDTO"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "id",
+          "result"
+        ],
+        "title": "_Response[get_coworking]"
+      },
+      "_Response[get_coworking_by_search_params]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "result": {
+            "items": {
+              "$ref": "#/components/schemas/CoworkingResponseDTO"
+            },
+            "type": "array",
+            "title": "Result"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "id",
+          "result"
+        ],
+        "title": "_Response[get_coworking_by_search_params]"
+      },
+      "_Response[login]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "result": {
+            "$ref": "#/components/schemas/TokenResponse"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "id",
+          "result"
+        ],
+        "title": "_Response[login]"
+      },
+      "_Response[logout]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "result": {
+            "type": "null",
+            "title": "Result"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "id",
+          "result"
+        ],
+        "title": "_Response[logout]"
+      },
+      "_Response[refresh_session]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "result": {
+            "$ref": "#/components/schemas/TokenResponse"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "id",
+          "result"
+        ],
+        "title": "_Response[refresh_session]"
+      },
+      "_Response[register]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "result": {
+            "$ref": "#/components/schemas/UserResponseDTO"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "id",
+          "result"
+        ],
+        "title": "_Response[register]"
+      }
+    }
+  }
+}
