@@ -8,6 +8,20 @@ on:
       - "**"
 jobs:
   run-tests:
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7.2.3-alpine
+        ports:
+          - 6379:6379
+
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -27,14 +41,21 @@ jobs:
         uses: snok/install-poetry@v1
 
       - name: Installing Dependencies
-        run: |
-          cd src/
-          poetry install
+        run: poetry install
 
       - name: Run tests
-        run: |
-          cd src/
-          poetry run pytest
+        env:
+          DATABASE_USER: postgres
+          DATABASE_PASSWORD: postgres
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+          DATABASE_NAME: postgres
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          SECRET_KEY: secret)
+          ACCESS_TOKEN_TTL_MINUTES: 60
+          SESSION_TTL_DAYS: 60
+        run: make tests
 
 
 
