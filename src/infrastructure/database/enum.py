@@ -35,3 +35,4 @@ class BookingStatus(enum.Enum):
     AWAIT_CONFIRM: str = 'await_confirm'
     CONFIRMED: str = 'confirmed'
     CANCELLED: str = 'cancelled'
+    PASSED: str = 'passed'

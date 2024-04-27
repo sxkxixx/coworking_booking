@@ -46,8 +46,7 @@ OpenAPI-спецификация находится в файле specification/
       "password": "password",
       "last_name": "string",
       "first_name": "string",
-      "patronymic": "string", // Опицональное поле
-      "is_student": true
+      "patronymic": "string" // Опицональное поле
     }
   }
 }

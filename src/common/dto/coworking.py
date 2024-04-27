@@ -2,6 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
+from .day_off import DayOffSchema
 from .images import CoworkingImageResponse
 from .schedule import ScheduleResponseDTO
 from .seats import SeatResponseDTO
@@ -32,3 +33,4 @@ class CoworkingDetailDTO(BaseModel):
     seats: List[SeatResponseDTO]
     working_schedules: List[ScheduleResponseDTO]
     images: List[CoworkingImageResponse]
+    days_off: List[DayOffSchema]

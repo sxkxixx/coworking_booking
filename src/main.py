@@ -8,12 +8,12 @@ from common.hasher import Hasher
 from common.session import TokenService
 from controllers.middlewares import AuthMiddleware
 from controllers.rest import ImageRouter
-from controllers.rpc.auth_router import AuthRouter
-from controllers.rpc.coworking_router import CoworkingRouter
+from controllers.rpc import AuthRouter, ReservationRouter, CoworkingRouter, UserRouter
 from infrastructure.config import ApplicationSettings, RedisSettings, ObjectStorageSettings
 from infrastructure.database.db import manager, database
 from infrastructure.database.models import *
 from storage.coworking import CoworkingRepository
+from storage.reservation.reservation_repository import ReservationRepository
 from storage.s3_repository import S3Repository
 from storage.session import RedisSessionRepository
 from storage.user import UserRepository
@@ -55,9 +55,13 @@ def _create_app() -> jsonrpc.API:
         application_settings.SECRET_KEY, application_settings.access_token_ttl
     )
     s3_repository = S3Repository(object_storage_settings)
+    reservation_repository = ReservationRepository(manager)
+
     # Initialize routers
     auth_router = AuthRouter(user_repository, hasher, token_service, session_repository)
     image_router = ImageRouter(user_repository, s3_repository)
+    user_router = UserRouter(user_repository, token_service)
+    reservation_router = ReservationRouter(reservation_repository)
     coworking_router = CoworkingRouter(coworking_repository)
 
     # Middlewares
@@ -68,6 +72,8 @@ def _create_app() -> jsonrpc.API:
     _app.bind_entrypoint(auth_router.build_entrypoint())
     _app.bind_entrypoint(coworking_router.build_entrypoint())
     _app.include_router(image_router.build_api_router())
+    _app.bind_entrypoint(user_router.build_entrypoint())
+    _app.bind_entrypoint(reservation_router.build_entrypoint())
 
     _app.add_middleware(BaseHTTPMiddleware, dispatch=auth_middleware)
 

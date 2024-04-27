@@ -105,5 +105,45 @@ class TestLoginMethod:
 
 class TestRefreshSession:
     @pytest.mark.asyncio
-    async def test(self):
-        pass
+    async def test_no_refresh_token(self, rpc_request: Callable) -> None:
+        params = {'fingerprint': 'string'}
+        response: httpx.Response = await rpc_request(
+            url=url, method='refresh_session', params=params
+        )
+        json_ = response.json()
+        assert json_['error']['code'] == -32003
+
+    @pytest.mark.asyncio
+    async def test_no_session(self, rpc_request: Callable) -> None:
+        params = {'fingerprint': 'string'}
+        cookies = {'refresh_token': 'refresh_token'}
+        response: httpx.Response = await rpc_request(
+            url=url, method='refresh_session', params=params, cookies=cookies
+        )
+        with pytest.raises(KeyError):
+            _ = response.cookies['refresh_session']
+        json_ = response.json()
+        assert json_['error']['code'] == -32003
+
+    @pytest.mark.asyncio
+    async def test_incorrect_fingerprint(
+            self, rpc_request: Callable, registered_user: dict
+    ) -> None:
+        login_params = {'data': {
+            'email': 'name.surname@urfu.ru',
+            'password': 'top_secret_test_pwd',
+            'fingerprint': 'any'
+        }}
+        login_response: httpx.Response = await rpc_request(
+            url=url, method='login', params=login_params
+        )
+        assert login_response.json().get('error') is None
+        assert (refresh_token := login_response.cookies.get('refresh_token')) is not None
+
+        refresh_session_params = {'fingerprint': 'another'}
+        refresh_response: httpx.Response = await rpc_request(
+            url=url, method='refresh_session',
+            params=refresh_session_params, cookies={'refresh_token': refresh_token}
+        )
+        json_ = refresh_response.json()
+        assert json_['error']['code'] == -32003

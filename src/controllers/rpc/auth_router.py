@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 
 import fastapi_jsonrpc as jsonrpc
@@ -5,23 +6,15 @@ from fastapi import Response, Request
 from peewee import IntegrityError
 
 from common.dto.user import UserCreateDTO, UserResponseDTO, Login, TokenResponse
+from common.exceptions.rpc import RegisterError, AuthenticationError, SessionError
 from common.hasher import Hasher
 from common.session import TokenService, Session
 from common.utils import utc_with_zone
+from common.utils.user import is_student
 from infrastructure.database import User
 from storage.session.session_repository import SessionRepository
 from storage.user.abstract_user_repository import AbstractUserRepository
 from .abstract_rpc_router import AbstractRPCRouter
-from common.exceptions.rpc import RegisterError, AuthenticationError, SessionError
-
-
-def parse_email_to_user_id(email: str) -> str:
-    """
-    Splits email to user id:
-
-    parse_email_to_user_id(name.surname@gmail.com) = "name.surname"
-    """
-    return email[:email.rfind('@')]
 
 
 class AuthRouter(AbstractRPCRouter):
@@ -48,13 +41,13 @@ class AuthRouter(AbstractRPCRouter):
     async def register(self, data: UserCreateDTO) -> UserResponseDTO:
         try:
             user: User = await self.user_repository.create(
-                id=parse_email_to_user_id(data.email),
+                id=os.urandom(16).hex(),
                 email=data.email,
                 hashed_password=self.hasher.get_hash(data.password),
                 last_name=data.last_name,
                 first_name=data.first_name,
                 patronymic=data.patronymic,
-                is_student=data.is_student
+                is_student=is_student(data.email)
             )
         except IntegrityError:
             raise RegisterError(data='User with current email already exists')

@@ -11,7 +11,6 @@ class UserCreateDTO(BaseModel):
     last_name: str
     first_name: str
     patronymic: Optional[str] = None
-    is_student: bool
 
     @field_validator('password')
     @classmethod
@@ -36,7 +35,7 @@ class UserResponseDTO(BaseModel):
     first_name: str
     patronymic: Optional[str] = None
     is_student: bool
-    avatar_url: Optional[str] = None
+    avatar_filename: Optional[str] = None
 
 
 class Login(BaseModel):
@@ -56,3 +55,33 @@ class Login(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_header: str = 'Authorization'
+
+
+class TelegramInfoResponse(BaseModel):
+    username: str
+
+
+class UserProfile(UserResponseDTO):
+    telegram_info: Optional[TelegramInfoResponse] = None
+
+
+class UpdateUserRequest(BaseModel):
+    email: Optional[EmailStr] = None
+    last_name: Optional[str] = None
+    first_name: Optional[str] = None
+    patronymic: Optional[str] = None
+
+    @field_validator('email')
+    @classmethod
+    def validate_email_domain(cls, email: Optional[str] = None) -> str:
+        if not email:
+            return email
+        for domain in EMAIL_DOMAINS:
+            if email.endswith(domain):
+                return email
+        raise ValueError('Incorrect email domain')
+
+
+class UserUpdateRequest(UpdateUserRequest):
+    token: TokenResponse
+    id: str

@@ -19,16 +19,11 @@ class S3Repository:
             region_name=settings.REGION_NAME,
         )
 
-    async def upload_file(self, file: UploadFile) -> tuple[str, str]:
+    async def upload_file(self, file: UploadFile) -> str:
         unique_filename = self._get_unique_filename(file.filename)
         async with self.session.client(self.service_name, endpoint_url=self.endpoint) as client:
             await client.upload_fileobj(file, self.bucket, unique_filename)
-            pre_signed_url = await client.generate_presigned_url(
-                'get_object',
-                Params={'Bucket': self.bucket, 'Key': unique_filename},
-                ExpiresIn=86400  # 1 day to cache
-            )
-        return unique_filename, pre_signed_url
+        return unique_filename
 
     async def get_file_stream(self, filename: str) -> AsyncGenerator[bytes, None]:
         async with self.session.client(self.service_name, endpoint_url=self.endpoint) as client:
@@ -40,11 +35,9 @@ class S3Repository:
                 while bytes_data := await response['Body'].read(CHUNK_SIZE):
                     yield bytes_data
 
-    async def get_presigned_url(self, filename: str) -> str:
-        pass
-
     async def delete_file(self, filename: str) -> None:
-        pass
+        async with self.session.client(self.service_name, endpoint_url=self.endpoint) as client:
+            await client.delete_object(Bucket=self.bucket, Key=filename)
 
     def _get_unique_filename(self, original_name: str) -> str:
         extension = original_name.split('.')[-1]

@@ -14,3 +14,8 @@ class AuthenticationError(BaseError):
 class SessionError(BaseError):
     CODE = -32003
     MESSAGE = 'Session is invalid'
+
+
+class Unauthorized(BaseError):
+    CODE = -32004
+    MESSAGE = 'Unauthorized'

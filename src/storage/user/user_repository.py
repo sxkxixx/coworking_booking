@@ -2,7 +2,7 @@ from typing import Optional
 
 from peewee_async import Manager
 
-from infrastructure.database import User
+from infrastructure.database import User, UserTelegramInfo
 from .abstract_user_repository import AbstractUserRepository
 
 
@@ -23,3 +23,10 @@ class UserRepository(AbstractUserRepository):
             User.update({User.avatar_filename: filename})
             .where(User.id == user.id)
         )
+
+    async def get_user_telegram_info(self, user_id: str) -> Optional[UserTelegramInfo]:
+        return await self.manager.get_or_none(UserTelegramInfo, UserTelegramInfo.user_id == user_id)
+
+    async def update(self, user: User, **value_set) -> User:
+        updated = await self.manager.update(user, value_set)
+        return await self.manager.get(User, User.id == user.id)
