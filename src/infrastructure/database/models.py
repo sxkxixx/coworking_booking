@@ -21,7 +21,7 @@ __all__ = [
 
 class User(peewee.Model):
     id: str = peewee.CharField(max_length=64, primary_key=True)
-    email: str = peewee.CharField(max_length=64, primary_key=True)
+    email: str = peewee.CharField(max_length=64, unique=True)
     hashed_password: str = peewee.CharField(max_length=256, null=False)
     last_name: str = peewee.CharField(max_length=32, null=False)
     first_name: str = peewee.CharField(max_length=32, null=False)

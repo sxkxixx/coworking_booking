@@ -1,215 +1,55 @@
 # Серверная часть сервиса для бронирования коворкингов УрФУ
 
-## Инструкция по запуску
+## Инструкция по локальному запуску
 
-* Установите зависимости (Makefile не описан полностью)
+* Установите зависимости
 
 ```bash
-make install-prod
+poetry install
 ```
+
+* Укажите нужные настройки в качестве переменных окружения или создайте файл .env в директории src/
+
+```bash
+    # Postgresql
+    export DATABASE_USER=...
+    export DATABASE_PASSWORD=...
+    export DATABASE_HOST=...
+    export DATABASE_PORT=...
+    export DATABASE_NAME=...
+    # Redis
+    export REDIS_HOST=...
+    export REDIS_PORT=...
+    # ...
+    export APP_HOSTNAME=...
+    export APP_PORT=...
+    export SECRET_KEY=...
+    export ACCESS_TOKEN_TTL_MINUTES=...
+    export SESSION_TTL_DAYS=...
+    # AWS Object Storage
+    export AWS_ACCESS_KEY_ID=...
+    export AWS_SECRET_ACCESS_KEY=...
+    export REGION_NAME=...
+    export BUCKET_NAME=...
+    export S3_ENDPOINT_URL=...
+```
+
+* Для запуска приложения перейдите в директорию src/ и введите
+
+```bash
+    uvicorn main:app --host <host> --port <port>
+```
+
+## Запуск в Docker
 
 * Соберите образ приложения
 
 ```bash
-  make build
+    docker build . -t <Image Name>
 ```
 
-* Запустите докер-образ в контейнере
+* Запустите контейнер
 
 ```bash
-make run
-```
-
-## API
-
-Основное API построено на JSON-RPC архитектуре. 
-Это значит, что HTTP статус-код при каждом ответе сервера равен 200.
-В случае возникновения ошибок, код ошибки и детали описаны в ответе сервера. Примеры ниже.
-OpenAPI-спецификация находится в файле specification/specification.json
-
-### Аутентификация пользователя
-
-* URL-адрес: ```/api/v1/auth```
-
-#### Регистрация пользователя
-
-Тело запроса:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": "0",
-  "method": "register",
-  "params": {
-    "data": {
-      "email": "name.surname@urfu.ru",
-      "password": "password",
-      "last_name": "string",
-      "first_name": "string",
-      "patronymic": "string" // Опицональное поле
-    }
-  }
-}
-```
-
-Ответ сервера:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": "0",
-  "result": {
-    "id": "name.surname",
-    "email": "name.surname@urfu.ru",
-    "last_name": "string",
-    "first_name": "string",
-    "patronymic": "string",
-    "is_student": true,
-    "avatar_url": "string"
-  }
-}
-```
-
-Ошибки:
-
-* Попытка зарегистрировать пользователя с неуникальным адресом эл. почты
-
-```json
-{
-  "jsonrpc": "2.0",
-  "error": {
-    "code": -32001,
-    "message": "Error while registering error",
-    "data": "User with current email already exists"
-  },
-  "id": "0"
-}
-```
-
-#### Аутентификация пользователя
-
-Тело запроса:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": "0",
-  "method": "login",
-  "params": {
-    "data": {
-      "email": "user.surname@urfu.me",
-      "password": "password",
-      "fingerprint": "string" // Подпись браузера
-    }
-  }
-}
-```
-
-Ответ сервера:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": "0",
-  "result": {
-    "access_token": "string",
-    "token_header": "Authorization"
-  }
-}
-```
-
-Ошибки:
-
-* Любое исключение при аутентификации
-
-```json
-{
-  "jsonrpc": "2.0",
-  "error": {
-    "code": -32002,
-    "message": "Invalid credentials"
-  },
-  "id": "0"
-}
-```
-
-#### Обновление сессии
-
-Тело запроса:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": "0",
-  "method": "refresh_session",
-  "params": {
-    "fingerprint": "string"
-  }
-}
-```
-
-Ответ сервера:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": "0",
-  "result": {
-    "access_token": "string",
-    "token_header": "Authorization"
-  }
-}
-```
-
-Ошибки:
-
-* Любое исключение при обновлении сессии
-
-```json
-{
-  "jsonrpc": "2.0",
-  "error": {
-    "code": -32003,
-    "message": "Session is invalid"
-  },
-  "id": "0"
-}
-```
-
-#### Удаление сессии (logout)
-
-Тело запроса:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": "0",
-  "method": "logout",
-  "params": {
-    "fingerprint": "string"
-  }
-}
-```
-
-Ответ сервера:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": "0",
-  "result": null
-}
-```
-
-Ошибки:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "error": {
-    "code": -32003,
-    "message": "Session is invalid"
-  },
-  "id": "0"
-}
+    docker run --env-file <path to .env> -p "port:port" --name <container name> <image name>
 ```
