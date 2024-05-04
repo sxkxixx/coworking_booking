@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Optional, List
 
 import peewee
@@ -24,10 +25,10 @@ class CoworkingRepository(AbstractCoworkingRepository):
             Coworking.select(Coworking)
             .where(Coworking.id == coworking_id)
             .join(CoworkingSeat, peewee.JOIN.LEFT_OUTER)
-            .switch(Coworking)
-            .join(WorkingSchedule, peewee.JOIN.LEFT_OUTER)
-            .switch(Coworking)
-            .join(CoworkingImages, peewee.JOIN.LEFT_OUTER)
+            .switch(Coworking).join(WorkingSchedule, peewee.JOIN.LEFT_OUTER)
+            .switch(Coworking).join(CoworkingImages, peewee.JOIN.LEFT_OUTER)
+            .switch(Coworking).join(NonBusinessDay, peewee.JOIN.LEFT_OUTER)
+            .where((NonBusinessDay.id.is_null(True)) | (NonBusinessDay.day >= date.today()))
         )
         return coworking
 

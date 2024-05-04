@@ -407,9 +407,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImageUrl"
-                }
+                "schema": {}
               }
             }
           },
@@ -461,6 +459,292 @@
           }
         }
       }
+    },
+    "/api/v1/user": {
+      "post": {
+        "tags": [
+          "USER"
+        ],
+        "summary": "Entrypoint",
+        "operationId": "entrypoint_api_v1_user_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response"
+                }
+              }
+            }
+          },
+          "210": {
+            "description": "[-32602] Invalid params\n\nInvalid method parameter(s)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[InvalidParams]"
+                }
+              }
+            }
+          },
+          "211": {
+            "description": "[-32601] Method not found\n\nThe method does not exist / is not available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[MethodNotFound]"
+                }
+              }
+            }
+          },
+          "212": {
+            "description": "[-32700] Parse error\n\nInvalid JSON was received by the server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[ParseError]"
+                }
+              }
+            }
+          },
+          "213": {
+            "description": "[-32600] Invalid Request\n\nThe JSON sent is not a valid Request object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[InvalidRequest]"
+                }
+              }
+            }
+          },
+          "214": {
+            "description": "[-32603] Internal error\n\nInternal JSON-RPC error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[InternalError]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/get_profile": {
+      "post": {
+        "tags": [
+          "USER"
+        ],
+        "summary": "Get Profile",
+        "operationId": "get_profile_api_v1_user_get_profile_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request[get_profile]"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response[get_profile]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/update_user_data": {
+      "post": {
+        "tags": [
+          "USER"
+        ],
+        "summary": "Update User Data",
+        "operationId": "update_user_data_api_v1_user_update_user_data_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request[update_user_data]"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response[update_user_data]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reservation": {
+      "post": {
+        "tags": [
+          "RESERVATION"
+        ],
+        "summary": "Entrypoint",
+        "operationId": "entrypoint_api_v1_reservation_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response"
+                }
+              }
+            }
+          },
+          "210": {
+            "description": "[-32602] Invalid params\n\nInvalid method parameter(s)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[InvalidParams]"
+                }
+              }
+            }
+          },
+          "211": {
+            "description": "[-32601] Method not found\n\nThe method does not exist / is not available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[MethodNotFound]"
+                }
+              }
+            }
+          },
+          "212": {
+            "description": "[-32700] Parse error\n\nInvalid JSON was received by the server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[ParseError]"
+                }
+              }
+            }
+          },
+          "213": {
+            "description": "[-32600] Invalid Request\n\nThe JSON sent is not a valid Request object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[InvalidRequest]"
+                }
+              }
+            }
+          },
+          "214": {
+            "description": "[-32603] Internal error\n\nInternal JSON-RPC error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ErrorResponse[InternalError]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reservation/get_user_reservations": {
+      "post": {
+        "tags": [
+          "RESERVATION"
+        ],
+        "summary": "Get User Reservations",
+        "operationId": "get_user_reservations_api_v1_reservation_get_user_reservations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request[get_user_reservations]"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response[get_user_reservations]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reservation/create_reservation": {
+      "post": {
+        "tags": [
+          "RESERVATION"
+        ],
+        "summary": "Create Reservation",
+        "operationId": "create_reservation_api_v1_reservation_create_reservation_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_Request[create_reservation]"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_Response[create_reservation]"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -478,6 +762,17 @@
           "image"
         ],
         "title": "Body_upload_avatar_api_v1_image_post"
+      },
+      "BookingStatus": {
+        "type": "string",
+        "enum": [
+          "new",
+          "await_confirm",
+          "confirmed",
+          "cancelled",
+          "passed"
+        ],
+        "title": "BookingStatus"
       },
       "CoworkingDetailDTO": {
         "properties": {
@@ -525,6 +820,13 @@
             },
             "type": "array",
             "title": "Images"
+          },
+          "days_off": {
+            "items": {
+              "$ref": "#/components/schemas/DayOffSchema"
+            },
+            "type": "array",
+            "title": "Days Off"
           }
         },
         "type": "object",
@@ -537,7 +839,8 @@
           "address",
           "seats",
           "working_schedules",
-          "images"
+          "images",
+          "days_off"
         ],
         "title": "CoworkingDetailDTO"
       },
@@ -592,6 +895,36 @@
         ],
         "title": "CoworkingResponseDTO"
       },
+      "DayOffSchema": {
+        "properties": {
+          "coworking_id": {
+            "type": "string",
+            "title": "Coworking Id"
+          },
+          "day": {
+            "type": "string",
+            "format": "date",
+            "title": "Day"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "coworking_id",
+          "day"
+        ],
+        "title": "DayOffSchema"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -604,19 +937,6 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
-      },
-      "ImageUrl": {
-        "properties": {
-          "pre_singed_url": {
-            "type": "string",
-            "title": "Pre Singed Url"
-          }
-        },
-        "type": "object",
-        "required": [
-          "pre_singed_url"
-        ],
-        "title": "ImageUrl"
       },
       "InternalError": {
         "properties": {
@@ -752,10 +1072,87 @@
         "type": "object",
         "title": "ParseError"
       },
+      "PlaceType": {
+        "type": "string",
+        "enum": [
+          "meeting_room",
+          "table"
+        ],
+        "title": "PlaceType",
+        "description": "Enum для определения типа места для бронирования"
+      },
+      "ReservationCreateRequest": {
+        "properties": {
+          "coworking_id": {
+            "type": "string",
+            "title": "Coworking Id"
+          },
+          "place_type": {
+            "$ref": "#/components/schemas/PlaceType"
+          },
+          "session_start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Session Start"
+          },
+          "session_end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Session End"
+          }
+        },
+        "type": "object",
+        "required": [
+          "coworking_id",
+          "place_type",
+          "session_start",
+          "session_end"
+        ],
+        "title": "ReservationCreateRequest"
+      },
+      "ReservationResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "seat": {
+            "$ref": "#/components/schemas/SeatResponseDTO"
+          },
+          "session_start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Session Start"
+          },
+          "session_end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Session End"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BookingStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "seat",
+          "session_start",
+          "session_end",
+          "status",
+          "created_at"
+        ],
+        "title": "ReservationResponse"
+      },
       "ScheduleResponseDTO": {
         "properties": {
           "coworking_id": {
-            "type": "integer",
+            "type": "string",
             "title": "Coworking Id"
           },
           "week_day": {
@@ -771,10 +1168,6 @@
             "type": "string",
             "format": "time",
             "title": "End Time"
-          },
-          "is_weekend": {
-            "type": "boolean",
-            "title": "Is Weekend"
           }
         },
         "type": "object",
@@ -782,8 +1175,7 @@
           "coworking_id",
           "week_day",
           "start_time",
-          "end_time",
-          "is_weekend"
+          "end_time"
         ],
         "title": "ScheduleResponseDTO"
       },
@@ -853,6 +1245,19 @@
         ],
         "title": "SeatResponseDTO"
       },
+      "TelegramInfoResponse": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username"
+        ],
+        "title": "TelegramInfoResponse"
+      },
       "TimestampRange": {
         "properties": {
           "from": {
@@ -891,6 +1296,57 @@
         ],
         "title": "TokenResponse"
       },
+      "UpdateUserRequest": {
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name"
+          },
+          "first_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Name"
+          },
+          "patronymic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patronymic"
+          }
+        },
+        "type": "object",
+        "title": "UpdateUserRequest"
+      },
       "UserCreateDTO": {
         "properties": {
           "email": {
@@ -920,10 +1376,6 @@
               }
             ],
             "title": "Patronymic"
-          },
-          "is_student": {
-            "type": "boolean",
-            "title": "Is Student"
           }
         },
         "type": "object",
@@ -931,10 +1383,75 @@
           "email",
           "password",
           "last_name",
+          "first_name"
+        ],
+        "title": "UserCreateDTO"
+      },
+      "UserProfile": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name"
+          },
+          "patronymic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patronymic"
+          },
+          "is_student": {
+            "type": "boolean",
+            "title": "Is Student"
+          },
+          "avatar_filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Filename"
+          },
+          "telegram_info": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TelegramInfoResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "last_name",
           "first_name",
           "is_student"
         ],
-        "title": "UserCreateDTO"
+        "title": "UserProfile"
       },
       "UserResponseDTO": {
         "properties": {
@@ -970,7 +1487,7 @@
             "type": "boolean",
             "title": "Is Student"
           },
-          "avatar_url": {
+          "avatar_filename": {
             "anyOf": [
               {
                 "type": "string"
@@ -979,7 +1496,7 @@
                 "type": "null"
               }
             ],
-            "title": "Avatar Url"
+            "title": "Avatar Filename"
           }
         },
         "type": "object",
@@ -991,6 +1508,68 @@
           "is_student"
         ],
         "title": "UserResponseDTO"
+      },
+      "UserUpdateRequest": {
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name"
+          },
+          "first_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Name"
+          },
+          "patronymic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patronymic"
+          },
+          "token": {
+            "$ref": "#/components/schemas/TokenResponse"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "id"
+        ],
+        "title": "UserUpdateRequest"
       },
       "ValidationError": {
         "properties": {
@@ -1251,6 +1830,18 @@
         ],
         "title": "_Params[available_coworking_by_timestamp]"
       },
+      "_Params[create_reservation]": {
+        "properties": {
+          "reservation": {
+            "$ref": "#/components/schemas/ReservationCreateRequest"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reservation"
+        ],
+        "title": "_Params[create_reservation]"
+      },
       "_Params[get_coworking]": {
         "properties": {
           "coworking_id": {
@@ -1275,6 +1866,16 @@
           "search"
         ],
         "title": "_Params[get_coworking_by_search_params]"
+      },
+      "_Params[get_profile]": {
+        "properties": {},
+        "type": "object",
+        "title": "_Params[get_profile]"
+      },
+      "_Params[get_user_reservations]": {
+        "properties": {},
+        "type": "object",
+        "title": "_Params[get_user_reservations]"
       },
       "_Params[login]": {
         "properties": {
@@ -1325,6 +1926,18 @@
           "data"
         ],
         "title": "_Params[register]"
+      },
+      "_Params[update_user_data]": {
+        "properties": {
+          "values_set": {
+            "$ref": "#/components/schemas/UpdateUserRequest"
+          }
+        },
+        "type": "object",
+        "required": [
+          "values_set"
+        ],
+        "title": "_Params[update_user_data]"
       },
       "_Request": {
         "properties": {
@@ -1397,6 +2010,42 @@
         ],
         "title": "_Request[available_coworking_by_timestamp]"
       },
+      "_Request[create_reservation]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "default": "create_reservation",
+            "example": "create_reservation"
+          },
+          "params": {
+            "$ref": "#/components/schemas/_Params[create_reservation]"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "params"
+        ],
+        "title": "_Request[create_reservation]"
+      },
       "_Request[get_coworking]": {
         "properties": {
           "jsonrpc": {
@@ -1468,6 +2117,78 @@
           "params"
         ],
         "title": "_Request[get_coworking_by_search_params]"
+      },
+      "_Request[get_profile]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "default": "get_profile",
+            "example": "get_profile"
+          },
+          "params": {
+            "$ref": "#/components/schemas/_Params[get_profile]"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "params"
+        ],
+        "title": "_Request[get_profile]"
+      },
+      "_Request[get_user_reservations]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "default": "get_user_reservations",
+            "example": "get_user_reservations"
+          },
+          "params": {
+            "$ref": "#/components/schemas/_Params[get_user_reservations]"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "params"
+        ],
+        "title": "_Request[get_user_reservations]"
       },
       "_Request[login]": {
         "properties": {
@@ -1613,6 +2334,42 @@
         ],
         "title": "_Request[register]"
       },
+      "_Request[update_user_data]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "default": "update_user_data",
+            "example": "update_user_data"
+          },
+          "params": {
+            "$ref": "#/components/schemas/_Params[update_user_data]"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "params"
+        ],
+        "title": "_Request[update_user_data]"
+      },
       "_Response": {
         "properties": {
           "jsonrpc": {
@@ -1682,6 +2439,38 @@
         ],
         "title": "_Response[available_coworking_by_timestamp]"
       },
+      "_Response[create_reservation]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "result": {
+            "$ref": "#/components/schemas/ReservationResponse"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "id",
+          "result"
+        ],
+        "title": "_Response[create_reservation]"
+      },
       "_Response[get_coworking]": {
         "properties": {
           "jsonrpc": {
@@ -1749,6 +2538,74 @@
           "result"
         ],
         "title": "_Response[get_coworking_by_search_params]"
+      },
+      "_Response[get_profile]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "result": {
+            "$ref": "#/components/schemas/UserProfile"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "id",
+          "result"
+        ],
+        "title": "_Response[get_profile]"
+      },
+      "_Response[get_user_reservations]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "result": {
+            "items": {
+              "$ref": "#/components/schemas/ReservationResponse"
+            },
+            "type": "array",
+            "title": "Result"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "id",
+          "result"
+        ],
+        "title": "_Response[get_user_reservations]"
       },
       "_Response[login]": {
         "properties": {
@@ -1878,6 +2735,38 @@
           "result"
         ],
         "title": "_Response[register]"
+      },
+      "_Response[update_user_data]": {
+        "properties": {
+          "jsonrpc": {
+            "title": "Jsonrpc",
+            "default": "2.0",
+            "example": "2.0"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id",
+            "example": 0
+          },
+          "result": {
+            "$ref": "#/components/schemas/UserUpdateRequest"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "id",
+          "result"
+        ],
+        "title": "_Response[update_user_data]"
       }
     }
   }

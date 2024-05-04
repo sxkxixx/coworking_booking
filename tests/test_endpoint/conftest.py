@@ -45,7 +45,8 @@ def rpc_request(async_client: httpx.AsyncClient) -> Callable:
             url: str,
             method: str,
             params: Optional[Any],
-            headers: Optional[dict] = None
+            headers: Optional[dict[str, str]] = None,
+            cookies: Optional[dict[str, str]] = None
     ) -> httpx.Response:
         request_body = {
             "jsonrpc": "2.0",
@@ -53,7 +54,12 @@ def rpc_request(async_client: httpx.AsyncClient) -> Callable:
             "method": method,
             "params": params or {}
         }
-        return await async_client.post(url, json=request_body, headers=headers or {})
+        return await async_client.post(
+            url,
+            json=request_body,
+            headers=headers,
+            cookies=cookies
+        )
 
     return inner
 

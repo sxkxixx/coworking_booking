@@ -20,8 +20,8 @@ __all__ = [
 
 
 class User(peewee.Model):
-    id: str = peewee.CharField(max_length=32, primary_key=True)
-    email: str = peewee.CharField(max_length=64, unique=True, null=False)
+    id: str = peewee.CharField(max_length=64, primary_key=True)
+    email: str = peewee.CharField(max_length=64, unique=True)
     hashed_password: str = peewee.CharField(max_length=256, null=False)
     last_name: str = peewee.CharField(max_length=32, null=False)
     first_name: str = peewee.CharField(max_length=32, null=False)
@@ -94,8 +94,8 @@ class Reservation(peewee.Model):
     seat: CoworkingSeat = peewee.ForeignKeyField(
         CoworkingSeat, backref='seat_booking', on_delete=OnDelete.CASCADE.value
     )
-    session_start: datetime.datetime = peewee.DateTimeField(null=False)
-    session_end: datetime.datetime = peewee.DateTimeField(null=False)
+    session_start = peewee.DateTimeField(null=False)
+    session_end = peewee.DateTimeField(null=False)
     status: BookingStatus = CharEnum(_enum=BookingStatus, default=BookingStatus.NEW, null=False)
     created_at: datetime.datetime = peewee.DateTimeField(default=datetime.datetime.utcnow)
 
@@ -117,9 +117,9 @@ class CoworkingImages(peewee.Model):
 
 
 class NonBusinessDay(peewee.Model):
-    id: int = peewee.BigIntegerField(primary_key=True)
+    id = peewee.BigIntegerField(primary_key=True)
     coworking: Coworking = peewee.ForeignKeyField(
-        Coworking, null=False, on_delete=OnDelete.CASCADE.value, backref='days'
+        Coworking, null=False, on_delete=OnDelete.CASCADE.value, backref='days_off'
     )
     day = peewee.DateField(null=False)
     reason: Optional[str] = peewee.CharField(null=True, max_length=512)

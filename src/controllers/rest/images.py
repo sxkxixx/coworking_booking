@@ -5,7 +5,6 @@ from fastapi import APIRouter, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 
 from common.context import CONTEXT_USER
-from common.dto.image import ImageUrl
 from infrastructure.database import User
 from storage.s3_repository import S3Repository
 from storage.user import AbstractUserRepository
@@ -31,13 +30,15 @@ class ImageRouter:
         )
         return router
 
-    async def upload_avatar(self, image: UploadFile = File()) -> ImageUrl:
+    async def upload_avatar(self, image: UploadFile = File()) -> None:
         user: Optional[User] = CONTEXT_USER.get()
         if not user:
             raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED.value)
-        filename, pre_signed_url = await self.s3_repository.upload_file(image)
+        if user.avatar_filename:
+            await self.s3_repository.delete_file(user.avatar_filename)
+        filename = await self.s3_repository.upload_file(image)
         await self.user_repository.set_avatar(user, filename)
-        return ImageUrl(pre_singed_url=pre_signed_url)
+        return None
 
     async def response_image(self, filename: str) -> StreamingResponse:
         """Возвращает поток байтов изображения из S3 хранилища"""
