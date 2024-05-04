@@ -19,7 +19,7 @@ class TestRegisterMethod:
         }}
         response: httpx.Response = await rpc_request(url=url, method='register', params=user)
         json = response.json()
-        assert json['result']['id'] == 'name.surname', json
+        assert json['result']['email'] == 'name.surname@urfu.me', json
 
     @pytest.mark.asyncio
     async def test_not_urfu_domain(self, rpc_request: Callable) -> None:
@@ -37,7 +37,7 @@ class TestRegisterMethod:
 
     @pytest.mark.asyncio
     async def test_short_password(self, rpc_request: Callable) -> None:
-        """Валиация на корреткий пароль"""
+        """Валидация на короткий пароль"""
         user = {'data': {
             'email': 'name.surname@urfu.ru', 'password': 's',
             'last_name': 'Surname', 'first_name': 'Name',
