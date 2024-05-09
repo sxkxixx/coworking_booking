@@ -29,7 +29,7 @@ async def lifespan(api: jsonrpc.API):
         NonBusinessDay,
         CoworkingImages,
         WorkingSchedule,
-        UserTelegramInfo
+        EmailAuthData
     ]
     with database:
         database.create_tables(models)

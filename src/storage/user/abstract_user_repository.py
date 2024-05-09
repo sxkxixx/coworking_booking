@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from infrastructure.database import User, UserTelegramInfo
+from infrastructure.database import User
 
 
 class AbstractUserRepository(ABC):
@@ -15,10 +15,6 @@ class AbstractUserRepository(ABC):
 
     @abstractmethod
     async def get(self, *filters) -> Optional[User]:
-        raise NotImplementedError()
-
-    @abstractmethod
-    async def get_user_telegram_info(self, user_id: str) -> Optional[UserTelegramInfo]:
         raise NotImplementedError()
 
     @abstractmethod

@@ -57,14 +57,6 @@ class TokenResponse(BaseModel):
     token_header: str = 'Authorization'
 
 
-class TelegramInfoResponse(BaseModel):
-    username: str
-
-
-class UserProfile(UserResponseDTO):
-    telegram_info: Optional[TelegramInfoResponse] = None
-
-
 class UpdateUserRequest(BaseModel):
     email: Optional[EmailStr] = None
     last_name: Optional[str] = None

@@ -7,7 +7,7 @@ from peewee_async import PostgresqlDatabase, Manager
 from infrastructure.config import DatabaseSettings
 from infrastructure.database.models import *
 
-models = [User, UserTelegramInfo]
+models = [User]
 
 
 @pytest_asyncio.fixture(scope='session', autouse=True)
