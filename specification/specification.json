@@ -1245,19 +1245,6 @@
         ],
         "title": "SeatResponseDTO"
       },
-      "TelegramInfoResponse": {
-        "properties": {
-          "username": {
-            "type": "string",
-            "title": "Username"
-          }
-        },
-        "type": "object",
-        "required": [
-          "username"
-        ],
-        "title": "TelegramInfoResponse"
-      },
       "TimestampRange": {
         "properties": {
           "from": {
@@ -1386,72 +1373,6 @@
           "first_name"
         ],
         "title": "UserCreateDTO"
-      },
-      "UserProfile": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "last_name": {
-            "type": "string",
-            "title": "Last Name"
-          },
-          "first_name": {
-            "type": "string",
-            "title": "First Name"
-          },
-          "patronymic": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Patronymic"
-          },
-          "is_student": {
-            "type": "boolean",
-            "title": "Is Student"
-          },
-          "avatar_filename": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Avatar Filename"
-          },
-          "telegram_info": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TelegramInfoResponse"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "email",
-          "last_name",
-          "first_name",
-          "is_student"
-        ],
-        "title": "UserProfile"
       },
       "UserResponseDTO": {
         "properties": {
@@ -2559,7 +2480,7 @@
             "example": 0
           },
           "result": {
-            "$ref": "#/components/schemas/UserProfile"
+            "$ref": "#/components/schemas/UserResponseDTO"
           }
         },
         "additionalProperties": false,
