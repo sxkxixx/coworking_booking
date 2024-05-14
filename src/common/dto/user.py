@@ -1,8 +1,18 @@
+import re
 from typing import Optional
+from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, computed_field, Field, model_validator
 
 from infrastructure.config import EMAIL_DOMAINS
+
+_password_patter = re.compile(
+    r"^(?=.*[0-9].*)"  # Check a number
+    r"(?=.*[a-z].*)"  # Check a-z
+    r"(?=.*[A-Z].*)"  # Check A-Z 
+    r"(?=.*[!,#$%&()*+-./:;<=>?@^_].*)"  # Check special char
+    r"[0-9a-zA-Z!,#$%&()*+-./:;<=>?@^_]{8,}$"
+)
 
 
 class UserCreateDTO(BaseModel):
@@ -17,6 +27,8 @@ class UserCreateDTO(BaseModel):
     def validate_password(cls, pwd: str) -> str:
         if len(pwd) < 8:
             raise ValueError('Password length gte 8 chars')
+        if _password_patter.match(pwd) is None:
+            raise ValueError("Password does not match the pattern")
         return pwd
 
     @field_validator('email')
@@ -29,13 +41,19 @@ class UserCreateDTO(BaseModel):
 
 
 class UserResponseDTO(BaseModel):
-    id: str
+    id: UUID
     email: EmailStr
     last_name: str
     first_name: str
     patronymic: Optional[str] = None
     is_student: bool
     avatar_filename: Optional[str] = None
+    telegram_chat_id: Optional[int] = Field(..., exclude=True)
+
+    @computed_field
+    @property
+    def is_telegram_logged_in(self) -> bool:
+        return self.telegram_chat_id is not None
 
 
 class Login(BaseModel):
@@ -74,6 +92,30 @@ class UpdateUserRequest(BaseModel):
         raise ValueError('Incorrect email domain')
 
 
-class UserUpdateRequest(UpdateUserRequest):
-    token: TokenResponse
-    id: str
+class ChangePasswordRequest(BaseModel):
+    password: str
+    password_repeat: str
+    fingerprint: str
+
+    @field_validator('password')
+    @classmethod
+    def validate_pattern(cls, password: str) -> str:
+        if _password_patter.match(password) is None:
+            raise ValueError('Password does not match the pattern')
+        return password
+
+    @model_validator(mode='after')
+    def check_equals(self):
+        if self.password != self.password_repeat:
+            raise ValueError("Passwords must be equals")
+        return self
+
+
+class ChangePasswordResponse(BaseModel):
+    access_token: str = None
+    login_required: bool = True
+
+
+class ResetPasswordRequest(ChangePasswordRequest):
+    email: str
+    token: str

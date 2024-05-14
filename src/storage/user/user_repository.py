@@ -2,16 +2,32 @@ from typing import Optional
 
 from peewee_async import Manager
 
+from common.dto.user import UserCreateDTO
+from common.hasher import Hasher
+from common.utils.user import is_student
 from infrastructure.database import User
 from .abstract_user_repository import AbstractUserRepository
 
 
 class UserRepository(AbstractUserRepository):
-    def __init__(self, manager: Manager):
+    def __init__(
+            self,
+            manager: Manager,
+            hasher: Hasher
+    ):
         self.manager = manager
+        self.hasher = hasher
 
-    async def create(self, **kwargs) -> User:
-        user: User = await self.manager.create(User, **kwargs)
+    async def create(self, data: UserCreateDTO) -> User:
+        user: User = await self.manager.create(
+            User,
+            email=data.email,
+            hashed_password=self.hasher.get_hash(data.password),
+            last_name=data.last_name,
+            first_name=data.first_name,
+            patronymic=data.patronymic,
+            is_student=is_student(data.email)
+        )
         return user
 
     async def get(self, *filters) -> Optional[User]:
@@ -27,3 +43,7 @@ class UserRepository(AbstractUserRepository):
     async def update(self, user: User, **value_set) -> User:
         updated = await self.manager.update(user, value_set)
         return await self.manager.get(User, User.id == user.id)
+
+    async def update_password(self, user: User, password: str) -> None:
+        user.hashed_password = self.hasher.get_hash(password)
+        await self.manager.update(user)

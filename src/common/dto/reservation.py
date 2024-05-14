@@ -30,6 +30,6 @@ class ReservationCreateRequest(BaseModel):
 
     @model_validator(mode='after')
     def validate_range(self):
-        if self.session_end >= self.session_start:
+        if self.session_start >= self.session_end:
             raise ValueError('"session_end" can\'t be less than "session_start"')
         return self

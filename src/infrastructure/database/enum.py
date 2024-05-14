@@ -36,3 +36,8 @@ class BookingStatus(enum.Enum):
     CONFIRMED: str = 'confirmed'
     CANCELLED: str = 'cancelled'
     PASSED: str = 'passed'
+
+
+class PasswordTokenEnum(enum.Enum):
+    NEW = 'new'
+    USED = 'used'

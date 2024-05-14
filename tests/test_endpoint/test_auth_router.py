@@ -13,7 +13,7 @@ class TestRegisterMethod:
         Простой тест на корректную работу метода
         """
         user = {'data': {
-            'email': 'name.surname@urfu.me', 'password': 'top_secret_test_pwd',
+            'email': 'name.surname@urfu.me', 'password': 'Password1!',
             'last_name': 'Surname', 'first_name': 'Name',
             'patronymic': None, 'is_student': True
         }}
@@ -27,7 +27,7 @@ class TestRegisterMethod:
         Проверка валидации на почтовый домен, не принадлежащий к корпоративному УрФУ
         """
         user = {'data': {
-            'email': 'name.surname@gmail.com', 'password': 'top_secret_test_pwd',
+            'email': 'name.surname@gmail.com', 'password': 'Password1!',
             'last_name': 'Surname', 'first_name': 'Name',
             'patronymic': None, 'is_student': True
         }}
@@ -51,7 +51,7 @@ class TestRegisterMethod:
     async def test_not_unique_email(self, rpc_request: Callable) -> None:
         """Валидация на неуникальный email"""
         user = {'data': {
-            'email': 'name.surname@urfu.ru', 'password': 'top_secret_test_pwd',
+            'email': 'name.surname@urfu.ru', 'password': 'Password1!',
             'last_name': 'Surname', 'first_name': 'Name',
             'patronymic': None, 'is_student': True
         }}
@@ -69,7 +69,7 @@ class TestLoginMethod:
         """
         credentials = {'data': {
             'email': 'name.surname@urfu.ru',
-            'password': 'top_secret_test_pwd',
+            'password': 'Password1!',
             'fingerprint': 'fingerprint'
         }}
         response: httpx.Response = await rpc_request(url=url, method='login', params=credentials)
@@ -81,7 +81,7 @@ class TestLoginMethod:
         """Проверка работоспособности фикстуры и наличия токенов"""
         credentials = {'data': {
             'email': 'name.surname@urfu.ru',
-            'password': 'top_secret_test_pwd',
+            'password': 'Password1!',
             'fingerprint': 'fingerprint'
         }}
         response: httpx.Response = await rpc_request(url=url, method='login', params=credentials)
@@ -94,7 +94,7 @@ class TestLoginMethod:
         """Проверка на -32002 код при неправильном пароле"""
         credentials = {'data': {
             'email': 'name.surname@urfu.ru',
-            'password': 'change_me',
+            'password': 'Password1!!',
             'fingerprint': 'fingerprint'
         }}
         response: httpx.Response = await rpc_request(url=url, method='login', params=credentials)
@@ -131,7 +131,7 @@ class TestRefreshSession:
     ) -> None:
         login_params = {'data': {
             'email': 'name.surname@urfu.ru',
-            'password': 'top_secret_test_pwd',
+            'password': 'Password1!',
             'fingerprint': 'any'
         }}
         login_response: httpx.Response = await rpc_request(

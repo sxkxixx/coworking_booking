@@ -1,9 +1,9 @@
 from datetime import datetime, timezone, timedelta
 
 
-def current_ural_time() -> datetime:
-    zone = timezone(timedelta(hours=5))
-    return datetime.now(tz=zone)
+def get_yekaterinburg_dt() -> datetime:
+    tz = timezone(offset=timedelta(hours=+5))  # Yekaterinburg Time Zone
+    return datetime.now(tz)
 
 
 def utc_with_zone() -> datetime:

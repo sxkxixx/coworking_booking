@@ -7,7 +7,17 @@ from peewee_async import PostgresqlDatabase, Manager
 from infrastructure.config import DatabaseSettings
 from infrastructure.database.models import *
 
-models = [User]
+database_models = [
+    User,
+    Coworking,
+    WorkingSchedule,
+    CoworkingSeat,
+    Reservation,
+    CoworkingImages,
+    NonBusinessDay,
+    EmailAuthData,
+    PasswordResetToken,
+]
 
 
 @pytest_asyncio.fixture(scope='session', autouse=True)
@@ -36,9 +46,9 @@ def db_manager(db_settings: DatabaseSettings) -> Manager:
     database.set_allow_sync(False)
     manager = Manager(database=database)
     with manager.allow_sync():
-        for model in models:
+        for model in database_models:
             model._meta.database = database
-            model.create_table(True)
+            model.create_table()
     return manager
 
 
@@ -46,5 +56,5 @@ def db_manager(db_settings: DatabaseSettings) -> Manager:
 def truncate_tables(db_manager: Manager):
     yield
     with db_manager.allow_sync():
-        for model in models:
+        for model in database_models:
             model.truncate_table(cascade=True)

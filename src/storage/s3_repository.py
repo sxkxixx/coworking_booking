@@ -29,7 +29,7 @@ class S3Repository:
         async with self.session.client(self.service_name, endpoint_url=self.endpoint) as client:
             try:
                 response = await client.get_object(Bucket=self.bucket, Key=filename)
-            except BaseException:
+            except Exception:
                 yield b""
             else:
                 while bytes_data := await response['Body'].read(CHUNK_SIZE):

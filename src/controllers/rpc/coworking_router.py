@@ -39,7 +39,9 @@ class CoworkingRouter(AbstractRPCRouter):
     async def available_coworking_by_timestamp(
             self, interval: TimestampRange
     ) -> List[CoworkingResponseDTO]:
-        available_coworking_list = await self.coworking_repository.select_filter_by_timestamp_range(interval)
+        available_coworking_list = await self.coworking_repository.select_filter_by_timestamp_range(
+            interval
+        )
         return [
             CoworkingResponseDTO.model_validate(coworking, from_attributes=True)
             for coworking in available_coworking_list

@@ -4,3 +4,7 @@ class CoworkingNonBusinessDayException(Exception):
 
 class NotAllowedReservationTimeException(Exception):
     """Exception when there are not allowed time to create a reservation"""
+
+
+class CoworkingNotExistsException(Exception):
+    """Not exist coworking exception"""

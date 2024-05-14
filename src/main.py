@@ -1,18 +1,24 @@
 from contextlib import asynccontextmanager
 
 import fastapi_jsonrpc as jsonrpc
+import jinja2
 from aioredis import Redis
+from jinja2 import FileSystemLoader
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from common.hasher import Hasher
+from common.service.reset_password_send_service import PasswordResetSendService
 from common.session import TokenService
 from controllers.middlewares import AuthMiddleware
 from controllers.rest import ImageRouter
 from controllers.rpc import AuthRouter, ReservationRouter, CoworkingRouter, UserRouter
-from infrastructure.config import ApplicationSettings, RedisSettings, ObjectStorageSettings
+from controllers.rpc.user_settings_router import UserSettingsRouter
+from infrastructure.config import ApplicationSettings, RedisSettings, ObjectStorageSettings, \
+    InfrastructureSettings, SMTPSettings
 from infrastructure.database.db import manager, database
 from infrastructure.database.models import *
 from storage.coworking import CoworkingRepository
+from storage.password_reset_token import PasswordResetTokenRepository
 from storage.reservation.reservation_repository import ReservationRepository
 from storage.s3_repository import S3Repository
 from storage.session import RedisSessionRepository
@@ -20,7 +26,7 @@ from storage.user import UserRepository
 
 
 @asynccontextmanager
-async def lifespan(api: jsonrpc.API):
+async def lifespan(_api: jsonrpc.API):
     models = [
         User,
         Coworking,
@@ -29,13 +35,12 @@ async def lifespan(api: jsonrpc.API):
         NonBusinessDay,
         CoworkingImages,
         WorkingSchedule,
-        EmailAuthData
+        EmailAuthData,
+        PasswordResetToken
     ]
     with database:
         database.create_tables(models)
     yield
-    # with database:
-    #     database.drop_tables(models)
 
 
 def _create_app() -> jsonrpc.API:
@@ -43,12 +48,19 @@ def _create_app() -> jsonrpc.API:
     application_settings = ApplicationSettings()
     redis_settings = RedisSettings()
     object_storage_settings = ObjectStorageSettings()
+    smtp_settings = SMTPSettings()
+    infra_settings = InfrastructureSettings()
+
+    jinja2_env = jinja2.Environment(
+        loader=FileSystemLoader('/templates'),
+        enable_async=True
+    )
 
     redis = Redis(host=redis_settings.REDIS_HOST, port=redis_settings.REDIS_PORT)
 
     # Initialize utils, repositories and etc.
     hasher = Hasher()
-    user_repository = UserRepository(manager)
+    user_repository = UserRepository(manager, hasher)
     coworking_repository = CoworkingRepository(manager)
     session_repository = RedisSessionRepository(redis, application_settings.session_ttl)
     token_service = TokenService(
@@ -56,6 +68,12 @@ def _create_app() -> jsonrpc.API:
     )
     s3_repository = S3Repository(object_storage_settings)
     reservation_repository = ReservationRepository(manager)
+    password_reset_token_repo = PasswordResetTokenRepository(manager)
+
+    # Services
+    send_reset_password_message_service = PasswordResetSendService(
+        jinja2_env, smtp_settings, infra_settings
+    )
 
     # Initialize routers
     auth_router = AuthRouter(user_repository, hasher, token_service, session_repository)
@@ -63,6 +81,12 @@ def _create_app() -> jsonrpc.API:
     user_router = UserRouter(user_repository, token_service)
     reservation_router = ReservationRouter(reservation_repository)
     coworking_router = CoworkingRouter(coworking_repository)
+    user_settings_router = UserSettingsRouter(
+        user_repository,
+        password_reset_token_repo,
+        send_reset_password_message_service,
+        hasher
+    )
 
     # Middlewares
     auth_middleware = AuthMiddleware(token_service, user_repository)
@@ -74,6 +98,7 @@ def _create_app() -> jsonrpc.API:
     _app.include_router(image_router.build_api_router())
     _app.bind_entrypoint(user_router.build_entrypoint())
     _app.bind_entrypoint(reservation_router.build_entrypoint())
+    _app.bind_entrypoint(user_settings_router.build_entrypoint())
 
     _app.add_middleware(BaseHTTPMiddleware, dispatch=auth_middleware)
 

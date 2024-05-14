@@ -1,16 +1,26 @@
-import os
 from typing import Optional
 
 import fastapi_jsonrpc as jsonrpc
 from fastapi import Response, Request
 from peewee import IntegrityError
 
-from common.dto.user import UserCreateDTO, UserResponseDTO, Login, TokenResponse
-from common.exceptions.rpc import RegisterError, AuthenticationError, SessionError
+from common.context import CONTEXT_USER
+from common.dto.user import (
+    UserCreateDTO,
+    UserResponseDTO,
+    Login,
+    TokenResponse,
+    ChangePasswordRequest, ChangePasswordResponse
+)
+from common.exceptions.rpc import (
+    RegisterError,
+    AuthenticationError,
+    SessionError,
+    UnauthorizedError
+)
 from common.hasher import Hasher
 from common.session import TokenService, Session
 from common.utils import utc_with_zone
-from common.utils.user import is_student
 from infrastructure.database import User
 from storage.session.session_repository import SessionRepository
 from storage.user.abstract_user_repository import AbstractUserRepository
@@ -32,26 +42,19 @@ class AuthRouter(AbstractRPCRouter):
 
     def build_entrypoint(self) -> jsonrpc.Entrypoint:
         entrypoint = jsonrpc.Entrypoint(path='/api/v1/auth', tags=['AUTH'])
-        entrypoint.add_method_route(self.register)
-        entrypoint.add_method_route(self.login)
-        entrypoint.add_method_route(self.refresh_session)
-        entrypoint.add_method_route(self.logout)
+        entrypoint.add_method_route(self.register, errors=[RegisterError])
+        entrypoint.add_method_route(self.login, errors=[AuthenticationError])
+        entrypoint.add_method_route(self.refresh_session, errors=[SessionError])
+        entrypoint.add_method_route(self.logout, errors=[SessionError])
+        entrypoint.add_method_route(self.change_password, errors=[UnauthorizedError, SessionError])
         return entrypoint
 
     async def register(self, data: UserCreateDTO) -> UserResponseDTO:
         try:
-            user: User = await self.user_repository.create(
-                id=os.urandom(16).hex(),
-                email=data.email,
-                hashed_password=self.hasher.get_hash(data.password),
-                last_name=data.last_name,
-                first_name=data.first_name,
-                patronymic=data.patronymic,
-                is_student=is_student(data.email)
-            )
+            user: User = await self.user_repository.create(data)
         except IntegrityError:
             raise RegisterError(data='User with current email already exists')
-        return user
+        return UserResponseDTO.model_validate(user, from_attributes=True)
 
     async def login(self, data: Login, response: Response) -> TokenResponse:
         user: Optional[User] = await self.user_repository.get(User.email == data.email)
@@ -78,7 +81,7 @@ class AuthRouter(AbstractRPCRouter):
             response: Response
     ) -> TokenResponse:
         session_id: Optional[str] = request.cookies.get('refresh_token')
-        if session_id:
+        if not session_id:
             raise SessionError()
         session: Optional[Session] = await self.session_repository.get(session_id)
         response.delete_cookie('refresh_token')
@@ -115,3 +118,22 @@ class AuthRouter(AbstractRPCRouter):
             raise SessionError()
         await self.session_repository.delete(session_id)
         return None
+
+    async def change_password(
+            self,
+            data: ChangePasswordRequest,
+            request: Request,
+            response: Response
+    ) -> ChangePasswordResponse:
+        user: Optional[User] = CONTEXT_USER.get()
+        if not user:
+            raise UnauthorizedError()
+        if not (session_id := request.cookies.get('refresh_token', None)):
+            raise SessionError()
+        response.delete_cookie('refresh_token')
+        if not (session := await self.session_repository.get(session_id)):
+            raise SessionError()
+        if not (session.fingerprint == data.fingerprint and session.email == user.email):
+            raise SessionError()
+        await self.user_repository.update_password(user, self.hasher.get_hash(data.password))
+        return ChangePasswordResponse()

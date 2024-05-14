@@ -47,8 +47,8 @@ class CoworkingRepository(AbstractCoworkingRepository):
             .join(WorkingSchedule, peewee.JOIN.LEFT_OUTER)
             .where(WorkingSchedule.week_day == interval.start.weekday())
             .where(
-                (WorkingSchedule.start_time <= interval.start) &
-                (interval.end <= WorkingSchedule.end_time)
+                (WorkingSchedule.start_time <= interval.start.time()) &
+                (interval.end.time() <= WorkingSchedule.end_time)
             )
             # Проверка, работает ли коворкинг в указанный день
             .switch(Coworking)

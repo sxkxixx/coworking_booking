@@ -5,7 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     POETRY_VERSION="1.5.1" \
     PATH="$PATH:/root/.local/bin"
 
-COPY pyproject.toml poetry.lock start.sh ./
+COPY pyproject.toml poetry.lock start.sh templates/ ./
 
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
     poetry --version && \

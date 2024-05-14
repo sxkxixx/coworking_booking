@@ -44,3 +44,14 @@ class ObjectStorageSettings(BaseSettings):
     REGION_NAME: str
     BUCKET_NAME: str
     S3_ENDPOINT_URL: str
+
+
+class SMTPSettings(BaseSettings):
+    SMTP_EMAIL: str
+    SMTP_PASSWORD: str
+    SMTP_SERVER: str
+    SMTP_PORT: int
+
+
+class InfrastructureSettings(BaseSettings):
+    FRONTEND_URL: str = 'http://localhost:3000'

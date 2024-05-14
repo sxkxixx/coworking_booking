@@ -1,10 +1,11 @@
 import datetime
 from typing import Optional
+from uuid import uuid4
 
 import peewee
 
 from .db import database
-from .enum import OnDelete, Weekday, PlaceType, BookingStatus
+from .enum import OnDelete, Weekday, PlaceType, BookingStatus, PasswordTokenEnum
 from .fields import CharEnum, IntegerEnum
 
 __all__ = [
@@ -15,18 +16,19 @@ __all__ = [
     'Reservation',
     'CoworkingImages',
     'NonBusinessDay',
-    'EmailAuthData'
+    'EmailAuthData',
+    'PasswordResetToken'
 ]
 
 
 class User(peewee.Model):
-    id: str = peewee.CharField(max_length=64, primary_key=True)
+    id: str = peewee.CharField(max_length=64, primary_key=True, default=uuid4)
     email: str = peewee.CharField(max_length=64, unique=True)
     hashed_password: str = peewee.CharField(max_length=256, null=False)
     last_name: str = peewee.CharField(max_length=32, null=False)
     first_name: str = peewee.CharField(max_length=32, null=False)
     patronymic: Optional[str] = peewee.CharField(max_length=32, null=True)
-    is_student: bool = peewee.BooleanField(null=False)
+    is_student: bool = peewee.BooleanField()
     telegram_chat_id: int = peewee.BigIntegerField(null=True)
     avatar_filename: Optional[str] = peewee.CharField(max_length=128, null=True)
 
@@ -36,7 +38,7 @@ class User(peewee.Model):
 
 
 class Coworking(peewee.Model):
-    id: str = peewee.CharField(max_length=32, primary_key=True)
+    id: str = peewee.CharField(max_length=64, primary_key=True, default=uuid4)
     avatar: str = peewee.CharField(max_length=64)
     title = peewee.CharField(max_length=128, null=False)
     institute: str = peewee.CharField(max_length=128, null=False)
@@ -49,7 +51,7 @@ class Coworking(peewee.Model):
 
 
 class WorkingSchedule(peewee.Model):
-    id: int = peewee.IntegerField(primary_key=True)
+    id: int = peewee.BigAutoField(primary_key=True)
     coworking: Coworking = peewee.ForeignKeyField(
         Coworking, backref='working_schedules', on_delete=OnDelete.RESTRICT.value
     )
@@ -63,12 +65,12 @@ class WorkingSchedule(peewee.Model):
 
 
 class CoworkingSeat(peewee.Model):
-    id: int = peewee.IntegerField(primary_key=True)
+    id: int = peewee.BigAutoField(primary_key=True)
     coworking: Coworking = peewee.ForeignKeyField(Coworking, backref='seats')
     label: Optional[str] = peewee.CharField(max_length=64, null=True)
     description: str = peewee.CharField(max_length=1024, null=False)
     place_type: PlaceType = CharEnum(_enum=PlaceType, max_length=32, null=False)
-    seats_count: int = peewee.SmallIntegerField(null=False)
+    seats_count: int = peewee.SmallIntegerField()
 
     class Meta:
         table_name = 'coworking_seats'
@@ -76,7 +78,7 @@ class CoworkingSeat(peewee.Model):
 
 
 class Reservation(peewee.Model):
-    id = peewee.BigIntegerField(primary_key=True)
+    id = peewee.BigAutoField(primary_key=True)
     user: User = peewee.ForeignKeyField(
         User, backref='user_bookings', on_delete=OnDelete.CASCADE.value
     )
@@ -85,7 +87,7 @@ class Reservation(peewee.Model):
     )
     session_start = peewee.DateTimeField(null=False)
     session_end = peewee.DateTimeField(null=False)
-    status: BookingStatus = CharEnum(_enum=BookingStatus, default=BookingStatus.NEW, null=False)
+    status: BookingStatus = CharEnum(_enum=BookingStatus, null=False)
     created_at: datetime.datetime = peewee.DateTimeField(default=datetime.datetime.utcnow)
 
     class Meta:
@@ -106,7 +108,7 @@ class CoworkingImages(peewee.Model):
 
 
 class NonBusinessDay(peewee.Model):
-    id = peewee.BigIntegerField(primary_key=True)
+    id = peewee.BigAutoField(primary_key=True)
     coworking: Coworking = peewee.ForeignKeyField(
         Coworking, null=False, on_delete=OnDelete.CASCADE.value, backref='days_off'
     )
@@ -119,12 +121,23 @@ class NonBusinessDay(peewee.Model):
 
 
 class EmailAuthData(peewee.Model):
-    id: int = peewee.BigIntegerField(primary_key=True)
+    id: int = peewee.BigAutoField(primary_key=True)
     user: User = peewee.ForeignKeyField(User, backref='bot_auths')
-    password: int = peewee.IntegerField(null=False)
+    password: int = peewee.IntegerField()
     created_at: datetime = peewee.DateTimeField(default=datetime.datetime.utcnow)
 
     class Meta:
         table_name = 'email_auth_data'
         database = database
 
+
+class PasswordResetToken(peewee.Model):
+    id: str = peewee.CharField(max_length=64, primary_key=True, default=uuid4)
+    user: User = peewee.ForeignKeyField(User, backref='password_reset')
+    fingerprint: str = peewee.CharField(max_length=128)
+    created_at: datetime.datetime = peewee.DateTimeField(default=datetime.datetime.utcnow)
+    status = CharEnum(_enum=PasswordTokenEnum, default=PasswordTokenEnum.NEW)
+
+    class Meta:
+        table_name = 'password_reset_tokens'
+        database = database

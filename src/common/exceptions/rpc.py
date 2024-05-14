@@ -16,6 +16,21 @@ class SessionError(BaseError):
     MESSAGE = 'Session is invalid'
 
 
-class Unauthorized(BaseError):
+class UnauthorizedError(BaseError):
     CODE = -32004
-    MESSAGE = 'Unauthorized'
+    MESSAGE = 'UnauthorizedError'
+
+
+class ReservationException(BaseError):
+    CODE = -32005
+    MESSAGE = 'Reservation exception'
+
+
+class UserNotExistsException(BaseError):
+    CODE = -32006
+    MESSAGE = 'User does not exist'
+
+
+class ResetPasswordException(BaseError):
+    CODE = -32007
+    MESSAGE = "Reset password exception"

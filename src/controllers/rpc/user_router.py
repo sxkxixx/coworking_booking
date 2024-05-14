@@ -5,10 +5,9 @@ import fastapi_jsonrpc as jsonrpc
 from common.context import CONTEXT_USER
 from common.dto.user import (
     UpdateUserRequest,
-    UserUpdateRequest,
-    TokenResponse, UserResponseDTO
+    UserResponseDTO
 )
-from common.exceptions.rpc import Unauthorized
+from common.exceptions.rpc import UnauthorizedError
 from common.session import TokenService
 from infrastructure.database import User
 from storage.user import AbstractUserRepository
@@ -33,21 +32,14 @@ class UserRouter(AbstractRPCRouter):
     async def get_profile(self) -> UserResponseDTO:
         user: Optional[User] = CONTEXT_USER.get()
         if not user:
-            raise Unauthorized()
+            raise UnauthorizedError()
         return UserResponseDTO.model_validate(user, from_attributes=True)
 
-    async def update_user_data(self, values_set: UpdateUserRequest) -> UserUpdateRequest:
+    async def update_user_data(self, values_set: UpdateUserRequest) -> UserResponseDTO:
         user: User = CONTEXT_USER.get()
         if not user:
-            raise Unauthorized()
+            raise UnauthorizedError()
         updated_user: User = await self.user_repository.update(
             user, **values_set.model_dump(exclude_none=True)
         )
-        access_token = self.token_service.get_access_token(updated_user)
-        return UserUpdateRequest(
-            email=updated_user.email,
-            last_name=updated_user.last_name,
-            first_name=updated_user.first_name,
-            patronymic=updated_user.patronymic,
-            token=TokenResponse(access_token=access_token)
-        )
+        return UserResponseDTO.model_validate(updated_user, from_attributes=True)
