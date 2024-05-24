@@ -14,9 +14,10 @@ database_models = [
     CoworkingSeat,
     Reservation,
     CoworkingImages,
-    NonBusinessDay,
+    CoworkingEvent,
     EmailAuthData,
     PasswordResetToken,
+    TechCapability
 ]
 
 

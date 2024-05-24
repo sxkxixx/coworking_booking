@@ -10,7 +10,7 @@ from common.exceptions.application import (
     CoworkingNonBusinessDayException,
     NotAllowedReservationTimeException, CoworkingNotExistsException
 )
-from infrastructure.database import Reservation, CoworkingSeat, Coworking, NonBusinessDay, User
+from infrastructure.database import Reservation, CoworkingSeat, Coworking, CoworkingEvent, User
 from infrastructure.database.enum import BookingStatus
 from storage.reservation import AbstractReservationRepository
 
@@ -78,9 +78,9 @@ class ReservationRepository(AbstractReservationRepository):
             raise CoworkingNotExistsException()
 
     async def check_business_day(self, coworking_id: str, _date: date) -> None:
-        non_business_day: Optional[NonBusinessDay] = await self.manager.get_or_none(
-            NonBusinessDay,
-            NonBusinessDay.day == _date,
+        non_business_day: Optional[CoworkingEvent] = await self.manager.get_or_none(
+            CoworkingEvent,
+            CoworkingEvent.date == _date,
             coworking_id=coworking_id
         )
         if non_business_day is not None:

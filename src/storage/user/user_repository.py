@@ -35,13 +35,13 @@ class UserRepository(AbstractUserRepository):
         return user
 
     async def set_avatar(self, user: User, filename: str) -> None:
-        await self.manager.execute(
-            User.update({User.avatar_filename: filename})
-            .where(User.id == user.id)
-        )
+        user.avatar_filename = filename
+        await self.manager.update(user)
 
     async def update(self, user: User, **value_set) -> User:
-        updated = await self.manager.update(user, value_set)
+        for attribute in value_set:
+            setattr(user, attribute, value_set[attribute])
+        await self.manager.update(user)
         return await self.manager.get(User, User.id == user.id)
 
     async def update_password(self, user: User, password: str) -> None:

@@ -8,7 +8,7 @@ import pytest_asyncio
 from peewee_async import Manager
 
 from infrastructure.database import PlaceType
-from infrastructure.database.models import Coworking, CoworkingSeat, NonBusinessDay
+from infrastructure.database.models import Coworking, CoworkingSeat, CoworkingEvent
 
 
 @pytest_asyncio.fixture()
@@ -40,11 +40,13 @@ async def create_coworking_seat(create_coworking: Coworking, db_manager: Manager
 async def create_non_business_day(
         db_manager: Manager,
         create_coworking: Coworking
-) -> NonBusinessDay:
+) -> CoworkingEvent:
     return await db_manager.create(
-        NonBusinessDay,
+        CoworkingEvent,
         coworking=create_coworking,
-        day=datetime.date(2024, 5, 10),
+        date=datetime.date(2024, 5, 10),
+        name="null",
+        description="null",
     )
 
 
@@ -295,7 +297,7 @@ class TestCreateReservationMethod:
             access_token: str,
             create_coworking: Coworking,
             create_coworking_seat: CoworkingSeat,
-            create_non_business_day: NonBusinessDay,
+            create_non_business_day: CoworkingEvent,
     ) -> None:
         reservation = {'reservation': {
             'coworking_id': "Random_ID", 'place_type': 'meeting_room',

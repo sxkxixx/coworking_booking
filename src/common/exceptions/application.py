@@ -1,5 +1,5 @@
 class CoworkingNonBusinessDayException(Exception):
-    """Exception when there is attempt to create booking at not working day"""
+    """Exception when there is attempt to create booking at not working date"""
 
 
 class NotAllowedReservationTimeException(Exception):

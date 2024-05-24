@@ -53,7 +53,7 @@ class ReservationRouter(AbstractRPCRouter):
         except CoworkingNotExistsException:
             raise ReservationException(data={'error': 'coworking does not exists'})
         except CoworkingNonBusinessDayException:
-            raise ReservationException(data={'error': 'coworking does not work this day'})
+            raise ReservationException(data={'error': 'coworking does not work this date'})
         except NotAllowedReservationTimeException:
             raise ReservationException(
                 data={'error': 'not allowed to create a reservation to this timestamp range'}
