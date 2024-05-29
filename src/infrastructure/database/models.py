@@ -1,6 +1,6 @@
 import datetime
+import os
 from typing import Optional
-from uuid import uuid4
 
 import peewee
 
@@ -15,20 +15,26 @@ __all__ = [
     'CoworkingSeat',
     'Reservation',
     'CoworkingImages',
-    'NonBusinessDay',
+    'CoworkingEvent',
     'EmailAuthData',
-    'PasswordResetToken'
+    'PasswordResetToken',
+    'TechCapability'
 ]
 
 
+def _id() -> str:
+    return os.urandom(16).hex()
+
+
 class User(peewee.Model):
-    id: str = peewee.CharField(max_length=64, primary_key=True, default=uuid4)
+    id: str = peewee.CharField(max_length=64, primary_key=True, default=_id)
     email: str = peewee.CharField(max_length=64, unique=True)
     hashed_password: str = peewee.CharField(max_length=256, null=False)
     last_name: str = peewee.CharField(max_length=32, null=False)
     first_name: str = peewee.CharField(max_length=32, null=False)
     patronymic: Optional[str] = peewee.CharField(max_length=32, null=True)
     is_student: bool = peewee.BooleanField()
+    is_admin: bool = peewee.BooleanField(default=False)
     telegram_chat_id: int = peewee.BigIntegerField(null=True)
     avatar_filename: Optional[str] = peewee.CharField(max_length=128, null=True)
 
@@ -38,20 +44,20 @@ class User(peewee.Model):
 
 
 class Coworking(peewee.Model):
-    id: str = peewee.CharField(max_length=64, primary_key=True, default=uuid4)
-    avatar: str = peewee.CharField(max_length=64)
+    id: str = peewee.CharField(max_length=64, primary_key=True, default=_id)
+    avatar: str = peewee.CharField(max_length=64, null=True)
     title = peewee.CharField(max_length=128, null=False)
     institute: str = peewee.CharField(max_length=128, null=False)
     description: str = peewee.CharField(max_length=1024, null=False)
     address: str = peewee.CharField(max_length=128, null=False)
 
     class Meta:
-        table_name = 'coworking_places'
+        table_name = 'coworking'
         database = database
 
 
 class WorkingSchedule(peewee.Model):
-    id: int = peewee.BigAutoField(primary_key=True)
+    id = peewee.BigAutoField(primary_key=True)
     coworking: Coworking = peewee.ForeignKeyField(
         Coworking, backref='working_schedules', on_delete=OnDelete.RESTRICT.value
     )
@@ -68,7 +74,7 @@ class CoworkingSeat(peewee.Model):
     id: int = peewee.BigAutoField(primary_key=True)
     coworking: Coworking = peewee.ForeignKeyField(Coworking, backref='seats')
     label: Optional[str] = peewee.CharField(max_length=64, null=True)
-    description: str = peewee.CharField(max_length=1024, null=False)
+    description: str = peewee.CharField(max_length=1024, null=True)
     place_type: PlaceType = CharEnum(_enum=PlaceType, max_length=32, null=False)
     seats_count: int = peewee.SmallIntegerField()
 
@@ -107,16 +113,17 @@ class CoworkingImages(peewee.Model):
         database = database
 
 
-class NonBusinessDay(peewee.Model):
+class CoworkingEvent(peewee.Model):
     id = peewee.BigAutoField(primary_key=True)
     coworking: Coworking = peewee.ForeignKeyField(
-        Coworking, null=False, on_delete=OnDelete.CASCADE.value, backref='days_off'
+        Coworking, null=False, on_delete=OnDelete.CASCADE.value, backref='events'
     )
-    day = peewee.DateField(null=False)
-    reason: Optional[str] = peewee.CharField(null=True, max_length=512)
+    date = peewee.DateField(null=False)
+    name: str = peewee.CharField(max_length=128, null=False)
+    description: Optional[str] = peewee.CharField(max_length=512, null=True)
 
     class Meta:
-        table_name = 'coworking_non_business_days'
+        table_name = 'coworking_events'
         database = database
 
 
@@ -132,7 +139,7 @@ class EmailAuthData(peewee.Model):
 
 
 class PasswordResetToken(peewee.Model):
-    id: str = peewee.CharField(max_length=64, primary_key=True, default=uuid4)
+    id: str = peewee.CharField(max_length=64, primary_key=True, default=_id)
     user: User = peewee.ForeignKeyField(User, backref='password_reset')
     fingerprint: str = peewee.CharField(max_length=128)
     created_at: datetime.datetime = peewee.DateTimeField(default=datetime.datetime.utcnow)
@@ -140,4 +147,18 @@ class PasswordResetToken(peewee.Model):
 
     class Meta:
         table_name = 'password_reset_tokens'
+        database = database
+
+
+class TechCapability(peewee.Model):
+    id: int = peewee.BigAutoField(primary_key=True)
+    capability: str = peewee.CharField(max_length=64, null=False)
+    coworking: Coworking = peewee.ForeignKeyField(
+        Coworking,
+        null=False,
+        backref='technical_capabilities'
+    )
+
+    class Meta:
+        table_name = 'coworking_technical_capabilities'
         database = database

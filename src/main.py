@@ -3,21 +3,34 @@ from contextlib import asynccontextmanager
 import fastapi_jsonrpc as jsonrpc
 import jinja2
 from aioredis import Redis
+from fastapi.middleware.cors import CORSMiddleware
 from jinja2 import FileSystemLoader
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from common.dependencies.auth import AuthRequired
 from common.hasher import Hasher
 from common.service.reset_password_send_service import PasswordResetSendService
 from common.session import TokenService
 from controllers.middlewares import AuthMiddleware
 from controllers.rest import ImageRouter
-from controllers.rpc import AuthRouter, ReservationRouter, CoworkingRouter, UserRouter
-from controllers.rpc.user_settings_router import UserSettingsRouter
-from infrastructure.config import ApplicationSettings, RedisSettings, ObjectStorageSettings, \
-    InfrastructureSettings, SMTPSettings
+from controllers.rpc import (
+    AuthRouter,
+    ReservationRouter,
+    CoworkingRouter,
+    UserRouter,
+    UserSettingsRouter, AdminCoworkingRouter
+)
+from infrastructure.config import (
+    ApplicationSettings,
+    RedisSettings,
+    ObjectStorageSettings,
+    InfrastructureSettings,
+    SMTPSettings
+)
 from infrastructure.database.db import manager, database
 from infrastructure.database.models import *
 from storage.coworking import CoworkingRepository
+from storage.coworking_event import CoworkingEventRepository
 from storage.password_reset_token import PasswordResetTokenRepository
 from storage.reservation.reservation_repository import ReservationRepository
 from storage.s3_repository import S3Repository
@@ -32,11 +45,12 @@ async def lifespan(_api: jsonrpc.API):
         Coworking,
         Reservation,
         CoworkingSeat,
-        NonBusinessDay,
+        CoworkingEvent,
         CoworkingImages,
         WorkingSchedule,
         EmailAuthData,
-        PasswordResetToken
+        PasswordResetToken,
+        TechCapability
     ]
     with database:
         database.create_tables(models)
@@ -63,6 +77,7 @@ def _create_app() -> jsonrpc.API:
     user_repository = UserRepository(manager, hasher)
     coworking_repository = CoworkingRepository(manager)
     session_repository = RedisSessionRepository(redis, application_settings.session_ttl)
+    coworking_event_repository = CoworkingEventRepository(manager)
     token_service = TokenService(
         application_settings.SECRET_KEY, application_settings.access_token_ttl
     )
@@ -87,6 +102,9 @@ def _create_app() -> jsonrpc.API:
         send_reset_password_message_service,
         hasher
     )
+    admin_coworking_router = AdminCoworkingRouter(
+        coworking_repository, coworking_event_repository, s3_repository
+    )
 
     # Middlewares
     auth_middleware = AuthMiddleware(token_service, user_repository)
@@ -99,8 +117,17 @@ def _create_app() -> jsonrpc.API:
     _app.bind_entrypoint(user_router.build_entrypoint())
     _app.bind_entrypoint(reservation_router.build_entrypoint())
     _app.bind_entrypoint(user_settings_router.build_entrypoint())
+    _app.bind_entrypoint(admin_coworking_router.build_entrypoint())
 
     _app.add_middleware(BaseHTTPMiddleware, dispatch=auth_middleware)
+
+    _app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["GET", "POST"],
+        allow_headers=["*"],
+    )
 
     return _app
 

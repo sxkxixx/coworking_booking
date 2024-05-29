@@ -10,7 +10,7 @@ class AuthRequired:
         self.token_service = token_service
         self.user_repository = user_repository
 
-    async def __call__(self, access_token: Optional[str]) -> User:
+    async def __call__(self, access_token: Optional[str]) -> Optional[User]:
         if not access_token:
             return None
         if not (payload := self.token_service.get_token_payload(access_token)):

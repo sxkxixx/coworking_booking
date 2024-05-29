@@ -76,20 +76,9 @@ class TokenResponse(BaseModel):
 
 
 class UpdateUserRequest(BaseModel):
-    email: Optional[EmailStr] = None
     last_name: Optional[str] = None
     first_name: Optional[str] = None
     patronymic: Optional[str] = None
-
-    @field_validator('email')
-    @classmethod
-    def validate_email_domain(cls, email: Optional[str] = None) -> str:
-        if not email:
-            return email
-        for domain in EMAIL_DOMAINS:
-            if email.endswith(domain):
-                return email
-        raise ValueError('Incorrect email domain')
 
 
 class ChangePasswordRequest(BaseModel):

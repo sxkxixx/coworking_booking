@@ -8,6 +8,7 @@ from infrastructure.config import ObjectStorageSettings
 
 CHUNK_SIZE = 16 * 1024
 
+
 class S3Repository:
     def __init__(self, settings: ObjectStorageSettings):
         self.service_name = 's3'

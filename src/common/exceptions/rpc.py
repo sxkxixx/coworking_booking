@@ -34,3 +34,13 @@ class UserNotExistsException(BaseError):
 class ResetPasswordException(BaseError):
     CODE = -32007
     MESSAGE = "Reset password exception"
+
+
+class CoworkingDoesNotExistException(BaseError):
+    CODE = -32008
+    MESSAGE = 'Coworking does not exists'
+
+
+class NotAdminException(BaseError):
+    CODE = -32009
+    MESSAGE = 'User must have admin roots'

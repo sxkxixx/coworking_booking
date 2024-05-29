@@ -7,8 +7,9 @@ import pytest
 import pytest_asyncio
 from peewee_async import Manager
 
+from common.utils import get_yekaterinburg_dt
 from infrastructure.database import PlaceType
-from infrastructure.database.models import Coworking, CoworkingSeat, NonBusinessDay
+from infrastructure.database.models import Coworking, CoworkingSeat, CoworkingEvent
 
 
 @pytest_asyncio.fixture()
@@ -40,11 +41,13 @@ async def create_coworking_seat(create_coworking: Coworking, db_manager: Manager
 async def create_non_business_day(
         db_manager: Manager,
         create_coworking: Coworking
-) -> NonBusinessDay:
+) -> CoworkingEvent:
     return await db_manager.create(
-        NonBusinessDay,
+        CoworkingEvent,
         coworking=create_coworking,
-        day=datetime.date(2024, 5, 10),
+        date=datetime.date(2024, 5, 10),
+        name="null",
+        description="null",
     )
 
 
@@ -295,7 +298,7 @@ class TestCreateReservationMethod:
             access_token: str,
             create_coworking: Coworking,
             create_coworking_seat: CoworkingSeat,
-            create_non_business_day: NonBusinessDay,
+            create_non_business_day: CoworkingEvent,
     ) -> None:
         reservation = {'reservation': {
             'coworking_id': "Random_ID", 'place_type': 'meeting_room',
@@ -310,3 +313,151 @@ class TestCreateReservationMethod:
         )
         json_ = response.json()
         assert json_['error']['code'] == -32005
+
+    @pytest.mark.asyncio
+    async def test_booking_with_two_places(
+            self,
+            rpc_request: Callable,
+            access_token: str,
+            db_manager: Manager,
+    ) -> None:
+        coworking: Coworking = await db_manager.create(
+            Coworking,
+            title="Антресоли", institute="ГУК", description="description", address="Мира, 19",
+        )
+        await db_manager.create(
+            CoworkingSeat, coworking=coworking, label="Table_1_1",
+            description="Description", place_type=PlaceType.TABLE, seats_count=1,
+        )
+        await db_manager.create(
+            CoworkingSeat, coworking=coworking, label="Table_1_2",
+            description="Description", place_type=PlaceType.TABLE, seats_count=1,
+        )
+        response: httpx.Response = await rpc_request(
+            url='/api/v1/reservation',
+            method='create_reservation',
+            params={'reservation': {
+                'coworking_id': coworking.id,
+                'session_start': "2024-05-10 11:00:00",
+                'session_end': "2024-05-10 12:00:00",
+                'place_type': PlaceType.TABLE.value,
+            }},
+            headers={"Authorization": access_token}
+        )
+        json_ = response.json()
+        assert json_.get('error', None) is None
+        assert json_['result']['id']
+
+        response: httpx.Response = await rpc_request(
+            url='/api/v1/reservation',
+            method='create_reservation',
+            params={'reservation': {
+                'coworking_id': coworking.id,
+                'session_start': "2024-05-10 11:00:00",
+                'session_end': "2024-05-10 12:00:00",
+                'place_type': PlaceType.TABLE.value,
+            }},
+            headers={"Authorization": access_token}
+        )
+        json_ = response.json()
+        assert json_.get('error', None) is None
+        assert json_['result']['id']
+
+    @pytest.mark.asyncio
+    async def test_booking_with_one_place(
+            self,
+            rpc_request: Callable,
+            access_token: str,
+            db_manager: Manager,
+    ) -> None:
+        coworking: Coworking = await db_manager.create(
+            Coworking,
+            title="Антресоли", institute="ГУК", description="description", address="Мира, 19",
+        )
+        await db_manager.create(
+            CoworkingSeat, coworking=coworking, label="Table_1_1",
+            description="Description", place_type=PlaceType.TABLE, seats_count=1,
+        )
+
+        response: httpx.Response = await rpc_request(
+            url='/api/v1/reservation',
+            method='create_reservation',
+            params={'reservation': {
+                'coworking_id': coworking.id,
+                'session_start': "2024-05-10 11:00:00",
+                'session_end': "2024-05-10 12:00:00",
+                'place_type': PlaceType.TABLE.value,
+            }},
+            headers={"Authorization": access_token}
+        )
+        json_ = response.json()
+        assert json_.get('result')
+
+    @pytest.mark.asyncio
+    async def test_booking_no_place_with_need_place_type(
+            self,
+            rpc_request: Callable,
+            access_token: str,
+            db_manager: Manager,
+    ) -> None:
+        coworking: Coworking = await db_manager.create(
+            Coworking,
+            title="Антресоли", institute="ГУК", description="description", address="Мира, 19",
+        )
+        await db_manager.create(
+            CoworkingSeat, coworking=coworking, label="Table_1_1",
+            description="Description", place_type=PlaceType.MEETING_ROOM, seats_count=1,
+        )
+        response: httpx.Response = await rpc_request(
+            url='/api/v1/reservation',
+            method='create_reservation',
+            params={'reservation': {
+                'coworking_id': coworking.id,
+                'session_start': "2024-05-10 11:00:00",
+                'session_end': "2024-05-10 12:00:00",
+                'place_type': PlaceType.TABLE.value,
+            }},
+            headers={"Authorization": access_token}
+        )
+        json_ = response.json()
+        assert json_.get('error')
+        assert json_['error']['code'] == -32005
+
+    @pytest.mark.asyncio
+    async def test_not_allowed_because_event(
+            self,
+            rpc_request: Callable,
+            db_manager: Manager,
+            access_token: str,
+    ) -> None:
+        coworking: Coworking = await db_manager.create(
+            Coworking,
+            title="Антресоли", institute="ГУК", description="description", address="Мира, 19",
+        )
+        await db_manager.create(
+            CoworkingSeat, coworking=coworking, label="Table_1_1",
+            description="Description", place_type=PlaceType.MEETING_ROOM, seats_count=1,
+        )
+        await db_manager.create(
+            CoworkingEvent,
+            coworking=coworking,
+            date=datetime.date.today(),
+            name="Event",
+            description="Event_Description",
+        )
+        session_start = datetime.datetime.utcnow()
+        session_end = session_start + datetime.timedelta(hours=1)
+        response: httpx.Response = await rpc_request(
+            url='/api/v1/reservation',
+            method='create_reservation',
+            params={'reservation': {
+                'coworking_id': coworking.id,
+                'session_start': session_start.isoformat(),
+                'session_end': session_end.isoformat(),
+                'place_type': PlaceType.TABLE.value,
+            }},
+            headers={"Authorization": access_token}
+        )
+        json_ = response.json()
+        assert json_.get('error')
+        assert json_['error']['code'] == -32005, json_
