@@ -135,5 +135,5 @@ class AuthRouter(AbstractRPCRouter):
             raise SessionError()
         if not (session.fingerprint == data.fingerprint and session.email == user.email):
             raise SessionError()
-        await self.user_repository.update_password(user, self.hasher.get_hash(data.password))
+        await self.user_repository.update_password(user, data.password)
         return ChangePasswordResponse()

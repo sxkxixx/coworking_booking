@@ -34,6 +34,7 @@ class User(peewee.Model):
     first_name: str = peewee.CharField(max_length=32, null=False)
     patronymic: Optional[str] = peewee.CharField(max_length=32, null=True)
     is_student: bool = peewee.BooleanField()
+    is_admin: bool = peewee.BooleanField(default=False)
     telegram_chat_id: int = peewee.BigIntegerField(null=True)
     avatar_filename: Optional[str] = peewee.CharField(max_length=128, null=True)
 
@@ -73,7 +74,7 @@ class CoworkingSeat(peewee.Model):
     id: int = peewee.BigAutoField(primary_key=True)
     coworking: Coworking = peewee.ForeignKeyField(Coworking, backref='seats')
     label: Optional[str] = peewee.CharField(max_length=64, null=True)
-    description: str = peewee.CharField(max_length=1024, null=False)
+    description: str = peewee.CharField(max_length=1024, null=True)
     place_type: PlaceType = CharEnum(_enum=PlaceType, max_length=32, null=False)
     seats_count: int = peewee.SmallIntegerField()
 

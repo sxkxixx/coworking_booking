@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from jinja2 import FileSystemLoader
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from common.dependencies.auth import AuthRequired
 from common.hasher import Hasher
 from common.service.reset_password_send_service import PasswordResetSendService
 from common.session import TokenService

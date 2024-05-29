@@ -10,9 +10,11 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from common.hasher import Hasher
 from common.session import TokenService
 from controllers.middlewares import AuthMiddleware
-from controllers.rpc import AuthRouter, ReservationRouter, CoworkingRouter, UserRouter
+from controllers.rpc import AuthRouter, ReservationRouter, CoworkingRouter, UserRouter, \
+    AdminCoworkingRouter
 from infrastructure.config import RedisSettings, ApplicationSettings
 from storage.coworking import CoworkingRepository
+from storage.coworking_event import CoworkingEventRepository
 from storage.reservation.reservation_repository import ReservationRepository
 from storage.session import RedisSessionRepository
 from storage.user import UserRepository
@@ -32,6 +34,7 @@ def async_client(db_manager) -> httpx.AsyncClient:
     reservation_repository = ReservationRepository(db_manager)
     session_repository = RedisSessionRepository(redis, application_settings.session_ttl)
     coworking_repository = CoworkingRepository(db_manager)
+    coworking_event_repository = CoworkingEventRepository(db_manager)
     token_service = TokenService(
         application_settings.SECRET_KEY, application_settings.access_token_ttl
     )
@@ -40,6 +43,7 @@ def async_client(db_manager) -> httpx.AsyncClient:
     reservation_router = ReservationRouter(reservation_repository)
     coworking_router = CoworkingRouter(coworking_repository)
     user_router = UserRouter(user_repository, token_service)
+    admin_router = AdminCoworkingRouter(coworking_repository, coworking_event_repository, None)
 
     # Create app and register routers
     _app = jsonrpc.API()
@@ -47,6 +51,7 @@ def async_client(db_manager) -> httpx.AsyncClient:
     _app.bind_entrypoint(reservation_router.build_entrypoint())
     _app.bind_entrypoint(coworking_router.build_entrypoint())
     _app.bind_entrypoint(user_router.build_entrypoint())
+    _app.bind_entrypoint(admin_router.build_entrypoint())
 
     auth_middleware = AuthMiddleware(token_service, user_repository)
     _app.add_middleware(BaseHTTPMiddleware, dispatch=auth_middleware)

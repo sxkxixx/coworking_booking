@@ -78,12 +78,12 @@ class ReservationRepository(AbstractReservationRepository):
             raise CoworkingNotExistsException()
 
     async def check_business_day(self, coworking_id: str, _date: date) -> None:
-        non_business_day: Optional[CoworkingEvent] = await self.manager.get_or_none(
+        event: Optional[CoworkingEvent] = await self.manager.get_or_none(
             CoworkingEvent,
             CoworkingEvent.date == _date,
             coworking_id=coworking_id
         )
-        if non_business_day is not None:
+        if event is not None:
             raise CoworkingNonBusinessDayException()
 
     async def mark_as_cancelled(self, reservation: Reservation) -> None:

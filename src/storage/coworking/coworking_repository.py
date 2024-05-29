@@ -5,7 +5,9 @@ import peewee
 from peewee_async import Manager
 
 from common.dto.coworking import CoworkingCreateDTO
+from common.dto.coworking_seat import CreateSeatDTO
 from common.dto.input_params import SearchParams, TimestampRange
+from common.dto.schedule import ScheduleCreateDTO
 from common.dto.tech_capability import TechCapabilitySchema
 from infrastructure.database import (
     Coworking,
@@ -16,7 +18,7 @@ from infrastructure.database import (
     Reservation,
     TechCapability
 )
-from infrastructure.database.enum import BookingStatus
+from infrastructure.database.enum import BookingStatus, PlaceType
 from .abstract_coworking_repository import AbstractCoworkingRepository
 
 
@@ -115,3 +117,52 @@ class CoworkingRepository(AbstractCoworkingRepository):
             WorkingSchedule,
             WorkingSchedule.week_day == d.weekday()
         )
+
+    async def register_schedule(
+            self,
+            coworking: Coworking,
+            schedules: List[ScheduleCreateDTO]
+    ) -> List[WorkingSchedule]:
+        result = []
+        async with self.manager.transaction():
+            for schema in schedules:
+                schedule = await self.manager.create(
+                    WorkingSchedule,
+                    coworking=coworking,
+                    week_day=schema.week_day,
+                    start_time=schema.start_time,
+                    end_time=schema.end_time,
+                )
+                result.append(schedule)
+        return result
+
+    async def create_places(
+            self,
+            coworking: Coworking,
+            table_places: int,
+            meeting_rooms: List[CreateSeatDTO]
+    ) -> List[CoworkingSeat]:
+        result = []
+        async with self.manager.transaction():
+            for _ in range(table_places):
+                table_place: CoworkingSeat = await self.manager.create(
+                    CoworkingSeat,
+                    coworking=coworking,
+                    label=None,
+                    description=None,
+                    place_type=PlaceType.TABLE,
+                    seats_count=1,
+                )
+                result.append(table_place)
+
+            for room in meeting_rooms:
+                meeting_room = await self.manager.create(
+                    CoworkingSeat,
+                    coworking=coworking,
+                    label=room.label,
+                    description=room.description,
+                    place_type=PlaceType.MEETING_ROOM,
+                    seats_count=room.seats_count
+                )
+                result.append(meeting_room)
+        return result

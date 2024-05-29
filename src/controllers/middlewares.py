@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import Request
+from fastapi import Request, Response
 
 from common.context import CONTEXT_USER
 from common.dependencies.auth import AuthRequired
@@ -20,5 +20,5 @@ class AuthMiddleware:
     async def __call__(self, request: Request, call_next):
         user: Optional[User] = await self.auth_dependency(request.headers.get("Authorization"))
         CONTEXT_USER.set(user)
-        response = await call_next(request)
+        response: Response = await call_next(request)
         return response

@@ -147,3 +147,115 @@ class TestRefreshSession:
         )
         json_ = refresh_response.json()
         assert json_['error']['code'] == -32003
+
+
+class TestPasswordChangeMethod:
+    @pytest.mark.asyncio
+    async def test_password_change(self, rpc_request: Callable, registered_user: dict) -> None:
+        login_response: httpx.Response = await rpc_request(
+            url=url,
+            method="login",
+            params={"data": {
+                "email": "name.surname@urfu.ru",
+                "password": "Password1!",
+                "fingerprint": "null"}
+            },
+        )
+        login_json = login_response.json()
+        token = login_json["result"]["access_token"]
+
+        change_response: httpx.Response = await rpc_request(
+            url=url,
+            method="change_password",
+            params={"data": {
+                "password": "52Peterburg)",
+                "password_repeat": "52Peterburg)",
+                "fingerprint": "null"
+            }},
+            headers={"Authorization": token},
+            cookies={"refresh_token": login_response.cookies.get("refresh_token")}
+        )
+        change_pwd_json = change_response.json()
+        assert not change_pwd_json.get("error", None)
+        assert change_pwd_json["result"]["login_required"]
+        assert not change_response.cookies.get("refresh_token")
+
+        re_login_response: httpx.Response = await rpc_request(
+            url=url,
+            method="login",
+            params={"data": {
+                "email": "name.surname@urfu.ru",
+                "password": "52Peterburg)",
+                "fingerprint": "null"
+            }}
+        )
+        json_ = re_login_response.json()
+        assert not json_.get("error", None)
+        assert json_["result"]["access_token"]
+
+    # @pytest.mark.asyncio
+    # async def test_with_no_refresh_token(
+    #         self,
+    #         rpc_request: Callable,
+    #         registered_user: dict,
+    # ) -> None:
+    #     login_response: httpx.Response = await rpc_request(
+    #         url=url,
+    #         method="login",
+    #         params={"data": {
+    #             "email": "name.surname@urfu.ru",
+    #             "password": "Password1!",
+    #             "fingerprint": "null"
+    #         }},
+    #     )
+    #     login_json = login_response.json()
+    #     token = login_json["result"]["access_token"]
+    #
+    #     change_response: httpx.Response = await rpc_request(
+    #         url=url,
+    #         method="change_password",
+    #         params={"data": {
+    #             "password": "52Peterburg)",
+    #             "password_repeat": "52Peterburg)",
+    #             "fingerprint": "null"
+    #         }},
+    #         headers={"Authorization": token},
+    #         cookies={"refresh_token": None}
+    #     )
+    #     json_ = change_response.json()
+    #     assert not json_.get("result", None)
+    #
+    #     assert json_["error"]["code"] == -32003
+
+    @pytest.mark.asyncio
+    async def test_with_incorrect_fingerprint(
+            self,
+            rpc_request: Callable,
+            registered_user: dict,
+    ) -> None:
+        login_response: httpx.Response = await rpc_request(
+            url=url,
+            method="login",
+            params={"data": {
+                "email": "name.surname@urfu.ru",
+                "password": "Password1!",
+                "fingerprint": "null"}
+            },
+        )
+        login_json = login_response.json()
+        access_token = login_json["result"]["access_token"]
+
+        change_response: httpx.Response = await rpc_request(
+            url=url,
+            method="change_password",
+            params={"data": {
+                "password": "52Peterburg)",
+                "password_repeat": "52Peterburg)",
+                "fingerprint": "not-null"
+            }},
+            headers={"Authorization": access_token},
+            cookies={"refresh_token": login_response.cookies.get("refresh_token")}
+        )
+        change_pwd_json = change_response.json()
+        assert not change_pwd_json.get("result", None)
+        assert change_pwd_json["error"]["code"] == -32003
