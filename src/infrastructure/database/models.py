@@ -130,6 +130,7 @@ class CoworkingEvent(peewee.Model):
 class EmailAuthData(peewee.Model):
     id: int = peewee.BigAutoField(primary_key=True)
     user: User = peewee.ForeignKeyField(User, backref='bot_auths')
+    chat_id: int = peewee.BigIntegerField()
     password: int = peewee.IntegerField()
     created_at: datetime = peewee.DateTimeField(default=datetime.datetime.utcnow)
 

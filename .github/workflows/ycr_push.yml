@@ -1,0 +1,25 @@
+name: Push Container to Yandex Container Registry
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  push_to_yandex_cr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Yandex Cloud CR "Login"
+        uses: yc-actions/yc-cr-login@v2
+        with:
+          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+
+      - name: Build and push to YC CR
+        env:
+          CR_REGISTRY_ID: ${{ secrets.CR_REGISTRY_ID }}
+          CR_REPOSITORY: ${{ secrets.CR_REPOSITORY }}
+        run: |
+          docker build -t cr.yandex/$CR_REGISTRY_ID/$CR_REPOSITORY:latest .
+          docker push cr.yandex/$CR_REGISTRY_ID/$CR_REPOSITORY:latest
