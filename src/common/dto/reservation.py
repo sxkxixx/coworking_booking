@@ -2,17 +2,22 @@ from datetime import datetime
 
 from pydantic import BaseModel, field_validator, model_validator
 
-from common.dto.seats import SeatResponseDTO
 from infrastructure.database.enum import BookingStatus, PlaceType
+from .coworking import CoworkingResponseDTO
+from .seats import SeatResponseDTO
 
 
 class ReservationResponse(BaseModel):
     id: int
-    seat: SeatResponseDTO
     session_start: datetime
     session_end: datetime
     status: BookingStatus
     created_at: datetime
+    seat: SeatResponseDTO
+
+
+class DetailReservationDTO(ReservationResponse):
+    coworking: CoworkingResponseDTO
 
 
 class ReservationCreateRequest(BaseModel):

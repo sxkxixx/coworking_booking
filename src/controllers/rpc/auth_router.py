@@ -10,7 +10,7 @@ from common.dto.user import (
     UserResponseDTO,
     Login,
     TokenResponse,
-    ChangePasswordRequest, ChangePasswordResponse
+    ChangePasswordRequest
 )
 from common.exceptions.rpc import (
     RegisterError,
@@ -63,7 +63,7 @@ class AuthRouter(AbstractRPCRouter):
         if not self.hasher.validate_plain(data.password, user.hashed_password):
             raise AuthenticationError()
         access_token: str = self.token_service.get_access_token(user)
-        session = Session(user_id=user.id, email=user.email, fingerprint=data.fingerprint)
+        session = Session(user_id=user.id, email=user.email.lower(), fingerprint=data.fingerprint)
         session_id = await self.session_repository.setex(session)
         response.set_cookie(
             key='refresh_token',
@@ -124,7 +124,7 @@ class AuthRouter(AbstractRPCRouter):
             data: ChangePasswordRequest,
             request: Request,
             response: Response
-    ) -> ChangePasswordResponse:
+    ) -> None:
         user: Optional[User] = CONTEXT_USER.get()
         if not user:
             raise UnauthorizedError()
@@ -135,5 +135,6 @@ class AuthRouter(AbstractRPCRouter):
             raise SessionError()
         if not (session.fingerprint == data.fingerprint and session.email == user.email):
             raise SessionError()
+        await self.session_repository.delete(session_id)
         await self.user_repository.update_password(user, data.password)
-        return ChangePasswordResponse()
+        return None

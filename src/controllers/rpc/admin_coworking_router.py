@@ -15,6 +15,7 @@ from common.exceptions.rpc import (
     UnauthorizedError,
     NotAdminException
 )
+from common.utils.image_validators import is_valid_image_signature
 from infrastructure.database import Coworking, TechCapability, CoworkingEvent, CoworkingSeat, User
 from storage.coworking import AbstractCoworkingRepository
 from storage.coworking_event import AbstractCoworkingEventRepository
@@ -73,6 +74,11 @@ class AdminCoworkingRouter(AbstractRPCRouter):
             image: UploadFile = File()
     ) -> str:
         self.__check_admin()
+        if not await is_valid_image_signature(image):
+            raise HTTPException(
+                status_code=http.HTTPStatus.BAD_REQUEST,
+                detail="Invalid image signature"
+            )
         coworking: Optional[Coworking] = await self.coworking_repository.get(coworking_id)
         if not coworking:
             raise HTTPException(status_code=http.HTTPStatus.NOT_FOUND.value)
@@ -86,6 +92,11 @@ class AdminCoworkingRouter(AbstractRPCRouter):
             image: UploadFile = File(),
     ) -> str:
         self.__check_admin()
+        if not await is_valid_image_signature(image):
+            raise HTTPException(
+                status_code=http.HTTPStatus.BAD_REQUEST,
+                detail="Invalid image signature"
+            )
         coworking: Optional[Coworking] = await self.coworking_repository.get(coworking_id)
         if not coworking:
             raise HTTPException(status_code=http.HTTPStatus.NOT_FOUND.value)

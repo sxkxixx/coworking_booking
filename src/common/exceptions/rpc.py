@@ -18,7 +18,7 @@ class SessionError(BaseError):
 
 class UnauthorizedError(BaseError):
     CODE = -32004
-    MESSAGE = 'UnauthorizedError'
+    MESSAGE = 'Unauthorized Error'
 
 
 class ReservationException(BaseError):

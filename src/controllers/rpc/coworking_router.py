@@ -1,3 +1,4 @@
+import datetime
 from typing import List, Optional
 
 import fastapi_jsonrpc as jsonrpc
@@ -33,12 +34,26 @@ class CoworkingRouter(AbstractRPCRouter):
             self, search: SearchParams
     ) -> List[CoworkingResponseDTO]:
         """Поля title, institute могут быть равны значению null"""
-        coworking_list = await self.coworking_repository.find_by_search_params(search)
-        response_data = [
-            CoworkingResponseDTO.model_validate(coworking, from_attributes=True)
-            for coworking in coworking_list
-        ]
-        return response_data
+        coworkings: List[Coworking] = await self.coworking_repository.find_by_search_params(search)
+        result = []
+        for coworking in coworkings:
+            working_schedule: Optional[WorkingSchedule] = (
+                await self.coworking_repository.get_coworking_schedule_at_day(datetime.date.today())
+            )
+            result.append(
+                CoworkingResponseDTO(
+                    id=coworking.id,
+                    avatar=coworking.avatar,
+                    title=coworking.title,
+                    institute=coworking.institute,
+                    description=coworking.description,
+                    address=coworking.address,
+                    working_schedule=ScheduleResponseDTO.model_validate(
+                        working_schedule, from_attributes=True
+                    ) if working_schedule else None,
+                )
+            )
+        return result
 
     async def available_coworking_by_timestamp(
             self, interval: TimestampRange

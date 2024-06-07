@@ -1,7 +1,7 @@
 import logging
 import os
 from datetime import datetime, date
-from typing import Callable
+from typing import Callable, Dict, Any
 
 import httpx
 import pytest
@@ -415,3 +415,109 @@ class TestGetCoworkingByTimestampRange:
         )
         json_ = response.json()
         assert len(json_["result"]) == 0
+
+
+class TestSearchCoworking:
+    @pytest.mark.asyncio
+    async def test_no_coworkings(self, rpc_request: Callable) -> None:
+        response: httpx.Response = await rpc_request(
+            url=coworking_url,
+            method="get_coworking_by_search_params",
+            params={"search": {"title": "коворкинг"}},
+        )
+        json_: Dict[str, Any] = response.json()
+        assert json_.get("error", None) is None
+        assert len(json_["result"]) == 0
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "title",
+        [
+            "радиоточка",
+            "РАДИОТОЧКА",
+            "рАдИоТоЧкА",
+            "РаДио",
+            "ТОЧка",
+            "диоточ",
+        ]
+    )
+    async def test_search_radiotochka_by_title(
+            self,
+            rpc_request: Callable,
+            db_manager: Manager,
+            title: str,
+    ) -> None:
+        await db_manager.create(
+            Coworking,
+            title="Радиоточка",
+            institute="ИРИТ РТФ",
+            description="Описание радиоточки",
+            address="ул. Мира, д. 32",
+        )
+        response: httpx.Response = await rpc_request(
+            url=coworking_url,
+            method="get_coworking_by_search_params",
+            params={"search": {"title": title}}
+        )
+        json_: Dict[str, Any] = response.json()
+        assert json_.get("error", None) is None
+        assert len(json_["result"]) == 1
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "institute",
+        [
+            "ирит",
+            "ртф",
+            "ирит ртф",
+            "ИРИТ РТФ",
+        ]
+    )
+    async def test_search_by_institute(
+            self,
+            rpc_request: Callable,
+            db_manager: Manager,
+            institute: str
+    ) -> None:
+        await db_manager.create(
+            Coworking,
+            title="Радиоточка",
+            institute="ИРИТ РТФ",
+            description="Описание радиоточки",
+            address="ул. Мира, д. 32",
+        )
+        response: httpx.Response = await rpc_request(
+            url=coworking_url,
+            method="get_coworking_by_search_params",
+            params={"search": {"institute": institute}}
+        )
+        json_: Dict[str, Any] = response.json()
+        assert json_.get("error", None) is None
+        assert len(json_["result"]) == 1
+
+    @pytest.mark.asyncio
+    async def test_result_search_is_empty(
+            self,
+            rpc_request: Callable,
+            db_manager: Manager,
+    ) -> None:
+        await db_manager.create(
+            Coworking,
+            title="Радиоточка",
+            institute="ИРИТ РТФ",
+            description="Описание радиоточки",
+            address="ул. Мира, д. 32",
+        )
+        search_queries = [
+            "Антресоли", "антресоли", "FYNHTCJKB",
+            "Территория интеллектуального роста", "РОСТА",
+            "Катушка", "кАТУШКА"
+        ]
+        for title in search_queries:
+            response: httpx.Response = await rpc_request(
+                url=coworking_url,
+                method="get_coworking_by_search_params",
+                params={"search": {"title": title}}
+            )
+            json_: Dict[str, Any] = response.json()
+            assert len(json_["result"]) == 0

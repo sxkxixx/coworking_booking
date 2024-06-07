@@ -3,7 +3,10 @@ from typing import List, Optional
 import fastapi_jsonrpc as jsonrpc
 
 from common.context import CONTEXT_USER
-from common.dto.reservation import ReservationResponse, ReservationCreateRequest
+from common.dto.coworking import CoworkingResponseDTO
+from common.dto.reservation import ReservationResponse, ReservationCreateRequest, \
+    DetailReservationDTO
+from common.dto.seats import SeatResponseDTO
 from common.exceptions.application import (
     CoworkingNonBusinessDayException,
     NotAllowedReservationTimeException,
@@ -11,6 +14,7 @@ from common.exceptions.application import (
 )
 from common.exceptions.rpc import UnauthorizedError, ReservationException
 from infrastructure.database import User, Reservation
+from infrastructure.database.enum import BookingStatus
 from storage.reservation import AbstractReservationRepository
 from .abstract_rpc_router import AbstractRPCRouter
 
@@ -30,17 +34,28 @@ class ReservationRouter(AbstractRPCRouter):
         entrypoint.add_method_route(self.cancel_reservation, errors=[ReservationException])
         return entrypoint
 
-    async def get_user_reservations(self) -> List[ReservationResponse]:
+    async def get_user_reservations(self) -> List[DetailReservationDTO]:
         user: Optional[User] = CONTEXT_USER.get()
         if not user:
             raise UnauthorizedError()
         reservations: List[Reservation] = await self.reservation_repository.get_user_reservations(
-            user_id=user.id)
-        response_data = [
-            ReservationResponse.model_validate(reservation, from_attributes=True)
-            for reservation in reservations
-        ]
-        return response_data
+            user=user)
+        result = []
+        for reservation in reservations:
+            result.append(
+                DetailReservationDTO(
+                    id=reservation.id,
+                    seat=SeatResponseDTO.model_validate(reservation.seat, from_attributes=True),
+                    session_start=reservation.session_start,
+                    session_end=reservation.session_end,
+                    status=reservation.status,
+                    created_at=reservation.created_at,
+                    coworking=CoworkingResponseDTO.model_validate(
+                        reservation.seat.coworking, from_attributes=True
+                    ),
+                )
+            )
+        return result
 
     async def create_reservation(
             self, reservation: ReservationCreateRequest
@@ -49,7 +64,7 @@ class ReservationRouter(AbstractRPCRouter):
         if not user:
             raise UnauthorizedError()
         try:
-            created = await self.reservation_repository.create(user.id, reservation)
+            booking: Reservation = await self.reservation_repository.create(user.id, reservation)
         except CoworkingNotExistsException:
             raise ReservationException(data={'error': 'coworking does not exists'})
         except CoworkingNonBusinessDayException:
@@ -58,7 +73,7 @@ class ReservationRouter(AbstractRPCRouter):
             raise ReservationException(
                 data={'error': 'not allowed to create a reservation to this timestamp range'}
             )
-        return ReservationResponse.model_validate(created, from_attributes=True)
+        return ReservationResponse.model_validate(booking, from_attributes=True)
 
     async def cancel_reservation(
             self,
@@ -74,5 +89,9 @@ class ReservationRouter(AbstractRPCRouter):
             raise ReservationException(
                 data={'error': 'unable to cancel another user reservation'}
             )
+        if reservation.status == BookingStatus.PASSED:
+            raise ReservationException(data={'error': 'reservation already passed'})
+        if reservation.status == BookingStatus.CANCELLED:
+            raise ReservationException(data={'error': 'reservation already cancelled'})
         await self.reservation_repository.mark_as_cancelled(reservation)
         return None

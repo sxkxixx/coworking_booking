@@ -1,3 +1,4 @@
+import http
 from http import HTTPStatus
 from typing import Optional
 
@@ -5,17 +6,14 @@ from fastapi import APIRouter, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 
 from common.context import CONTEXT_USER
+from common.utils.image_validators import is_valid_image_signature
 from infrastructure.database import User
 from storage.s3_repository import S3Repository
 from storage.user import AbstractUserRepository
 
 
 class ImageRouter:
-    def __init__(
-            self,
-            user_repository: AbstractUserRepository,
-            s3_repository: S3Repository,
-    ):
+    def __init__(self, user_repository: AbstractUserRepository, s3_repository: S3Repository):
         self.user_repository = user_repository
         self.s3_repository = s3_repository
 
@@ -30,15 +28,20 @@ class ImageRouter:
         )
         return router
 
-    async def upload_avatar(self, image: UploadFile = File()) -> None:
+    async def upload_avatar(self, image: UploadFile = File()) -> str:
         user: Optional[User] = CONTEXT_USER.get()
         if not user:
             raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED.value)
+        if not await is_valid_image_signature(image):
+            raise HTTPException(
+                status_code=http.HTTPStatus.BAD_REQUEST,
+                detail="Invalid image signature"
+            )
         if user.avatar_filename:
             await self.s3_repository.delete_file(user.avatar_filename)
         filename = await self.s3_repository.upload_file(image)
         await self.user_repository.set_avatar(user, filename)
-        return None
+        return filename
 
     async def response_image(self, filename: str) -> StreamingResponse:
         """Возвращает поток байтов изображения из S3 хранилища"""
