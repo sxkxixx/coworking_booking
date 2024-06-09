@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 import dotenv
-from pydantic import computed_field
+from pydantic import computed_field, Field
 from pydantic_settings import BaseSettings
 
 dotenv.load_dotenv('.env')
@@ -55,3 +55,11 @@ class SMTPSettings(BaseSettings):
 
 class InfrastructureSettings(BaseSettings):
     FRONTEND_URL: str = 'http://localhost:3000'
+
+
+class LoggingSettings(BaseSettings):
+    log_format: str = Field(
+        "%(asctime)s - %(name)s.%(funcName)s:%(lineno)d - %(levelname)s - %(message)s",
+        validation_alias="LOG_FORMAT"
+    )
+    log_level: str = Field("INFO", validation_alias="LOG_LEVEL")

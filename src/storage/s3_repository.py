@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import AsyncGenerator
 
@@ -7,6 +8,8 @@ from fastapi import UploadFile
 from infrastructure.config import ObjectStorageSettings
 
 CHUNK_SIZE = 16 * 1024
+
+logger = logging.getLogger(__name__)
 
 
 class S3Repository:
@@ -30,7 +33,8 @@ class S3Repository:
         async with self.session.client(self.service_name, endpoint_url=self.endpoint) as client:
             try:
                 response = await client.get_object(Bucket=self.bucket, Key=filename)
-            except Exception:
+            except Exception as exc:
+                logger.info("Failed to receive file(name=%s) stream with exc=%s", filename, exc)
                 yield b""
             else:
                 while bytes_data := await response['Body'].read(CHUNK_SIZE):

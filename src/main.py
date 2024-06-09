@@ -28,6 +28,7 @@ from infrastructure.config import (
 )
 from infrastructure.database.db import manager, database
 from infrastructure.database.models import *
+from infrastructure.logging import configure_logging
 from storage.coworking import CoworkingRepository
 from storage.coworking_event import CoworkingEventRepository
 from storage.password_reset_token import PasswordResetTokenRepository
@@ -58,6 +59,8 @@ async def lifespan(_api: jsonrpc.API):
 
 def _create_app() -> jsonrpc.API:
     # Initialize settings
+    configure_logging()
+
     application_settings = ApplicationSettings()
     redis_settings = RedisSettings()
     object_storage_settings = ObjectStorageSettings()

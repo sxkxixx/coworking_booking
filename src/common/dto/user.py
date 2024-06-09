@@ -1,6 +1,5 @@
 import re
 from typing import Optional
-from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, field_validator, computed_field, Field, model_validator
 
