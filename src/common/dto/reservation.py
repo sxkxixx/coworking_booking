@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, field_validator, model_validator, NaiveDatetime
 
 from infrastructure.database.enum import BookingStatus, PlaceType
 from .coworking import CoworkingResponseDTO
@@ -9,8 +9,8 @@ from .seats import SeatResponseDTO
 
 class ReservationResponse(BaseModel):
     id: int
-    session_start: datetime
-    session_end: datetime
+    session_start: NaiveDatetime
+    session_end: NaiveDatetime
     status: BookingStatus
     created_at: datetime
     seat: SeatResponseDTO
@@ -23,8 +23,8 @@ class DetailReservationDTO(ReservationResponse):
 class ReservationCreateRequest(BaseModel):
     coworking_id: str
     place_type: PlaceType
-    session_start: datetime
-    session_end: datetime
+    session_start: NaiveDatetime
+    session_end: NaiveDatetime
 
     @classmethod
     @field_validator('session_start')
