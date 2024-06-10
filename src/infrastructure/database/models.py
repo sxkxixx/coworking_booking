@@ -4,7 +4,6 @@ from typing import Optional
 
 import peewee
 
-from common.utils import get_yekaterinburg_dt
 from .db import database
 from .enum import OnDelete, Weekday, PlaceType, BookingStatus, PasswordTokenEnum
 from .fields import CharEnum, IntegerEnum
@@ -95,7 +94,7 @@ class Reservation(peewee.Model):
     session_start = peewee.DateTimeField(null=False)
     session_end = peewee.DateTimeField(null=False)
     status: BookingStatus = CharEnum(_enum=BookingStatus, null=False)
-    created_at: datetime.datetime = peewee.DateTimeField(default=get_yekaterinburg_dt)
+    created_at: datetime.datetime = peewee.DateTimeField(default=datetime.datetime.now)
 
     class Meta:
         table_name = 'seats_reservations'
@@ -133,7 +132,7 @@ class EmailAuthData(peewee.Model):
     user: User = peewee.ForeignKeyField(User, backref='bot_auths')
     chat_id: int = peewee.BigIntegerField()
     password: int = peewee.IntegerField()
-    created_at: datetime = peewee.DateTimeField(default=get_yekaterinburg_dt)
+    created_at: datetime = peewee.DateTimeField(default=datetime.datetime.now)
 
     class Meta:
         table_name = 'email_auth_data'
@@ -144,7 +143,7 @@ class PasswordResetToken(peewee.Model):
     id: str = peewee.CharField(max_length=64, primary_key=True, default=_id)
     user: User = peewee.ForeignKeyField(User, backref='password_reset')
     fingerprint: str = peewee.CharField(max_length=128)
-    created_at: datetime.datetime = peewee.DateTimeField(default=get_yekaterinburg_dt)
+    created_at: datetime.datetime = peewee.DateTimeField(default=datetime.datetime.now)
     status = CharEnum(_enum=PasswordTokenEnum, default=PasswordTokenEnum.NEW)
 
     class Meta:

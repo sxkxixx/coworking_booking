@@ -1,12 +1,11 @@
-from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, NaiveDatetime
 
 
 class TimestampRange(BaseModel):
-    start: datetime = Field(..., validation_alias="from")
-    end: datetime = Field(..., validation_alias="to")
+    start: NaiveDatetime = Field(..., validation_alias="from")
+    end: NaiveDatetime = Field(..., validation_alias="to")
 
     @model_validator(mode="after")
     def validate_range(self):

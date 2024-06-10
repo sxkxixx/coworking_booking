@@ -1,5 +1,4 @@
-import datetime
-from datetime import date
+from datetime import date, datetime, timedelta
 from typing import List, Optional
 
 import peewee
@@ -10,7 +9,6 @@ from common.exceptions.application import (
     CoworkingNonBusinessDayException,
     NotAllowedReservationTimeException, CoworkingNotExistsException
 )
-from common.utils import get_yekaterinburg_dt
 from infrastructure.database import Reservation, CoworkingSeat, Coworking, CoworkingEvent, User
 from infrastructure.database.enum import BookingStatus
 from storage.reservation import AbstractReservationRepository
@@ -25,7 +23,7 @@ class ReservationRepository(AbstractReservationRepository):
             Reservation.select()
             .where(
                 (Reservation.user == user) &
-                (Reservation.session_end >= get_yekaterinburg_dt()) &
+                (Reservation.session_end >= datetime.now()) &
                 (Reservation.status != BookingStatus.CANCELLED)
             )
             .join(CoworkingSeat)
@@ -58,7 +56,7 @@ class ReservationRepository(AbstractReservationRepository):
         if seat is None:
             raise NotAllowedReservationTimeException()
         status = BookingStatus.NEW
-        if (reservation.session_start - datetime.datetime.now()) <= datetime.timedelta(minutes=30):
+        if (reservation.session_start - datetime.now()) <= timedelta(minutes=30):
             status = BookingStatus.CONFIRMED
         reservation: Reservation = await self.manager.create(
             Reservation,
