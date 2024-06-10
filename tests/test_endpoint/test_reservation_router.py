@@ -52,6 +52,9 @@ async def create_non_business_day(
     )
 
 
+URAL_TZ = datetime.timezone(offset=datetime.timedelta(hours=+5))
+
+
 class TestCreateReservationMethod:
     @pytest.mark.asyncio
     async def test_create_reservation_if_coworking_not_exists(
@@ -59,10 +62,12 @@ class TestCreateReservationMethod:
             rpc_request: Callable,
             access_token: str,
     ):
+        session_start = datetime.datetime.now(tz=URAL_TZ) + datetime.timedelta(hours=1)
+        session_end = session_start + datetime.timedelta(hours=1)
         reservation = {'reservation': {
             'coworking_id': "Random_ID", 'place_type': 'meeting_room',
-            'session_start': "2024-05-10 11:00:00",
-            'session_end': "2024-05-10 12:00:00",
+            'session_start': session_start.isoformat(),
+            'session_end': session_end.isoformat(),
         }}
         response: httpx.Response = await rpc_request(
             url='/api/v1/reservation',
@@ -82,7 +87,7 @@ class TestCreateReservationMethod:
             create_coworking: Coworking,
             create_coworking_seat: CoworkingSeat
     ) -> None:
-        current_time = datetime.datetime.now()
+        current_time = datetime.datetime.now(tz=URAL_TZ)
         session_start = current_time + datetime.timedelta(hours=1)
         session_end = session_start + datetime.timedelta(hours=1)
         reservation = {'reservation': {
@@ -109,7 +114,7 @@ class TestCreateReservationMethod:
             create_coworking: Coworking,
             create_coworking_seat: CoworkingSeat
     ) -> None:
-        current_time = datetime.datetime.utcnow()
+        current_time = datetime.datetime.now(tz=URAL_TZ)
         session_start = current_time + datetime.timedelta(minutes=15)
         session_end = session_start + datetime.timedelta(hours=1)
         reservation = {'reservation': {
@@ -138,8 +143,8 @@ class TestCreateReservationMethod:
     ) -> None:
         first_reservation = {'reservation': {
             'coworking_id': create_coworking.id, 'place_type': 'meeting_room',
-            'session_start': datetime.datetime(2025, 5, 1, 13).isoformat(),
-            'session_end': datetime.datetime(2025, 5, 1, 14).isoformat(),
+            'session_start': datetime.datetime(2025, 5, 1, 13, tzinfo=URAL_TZ).isoformat(),
+            'session_end': datetime.datetime(2025, 5, 1, 14, tzinfo=URAL_TZ).isoformat(),
         }}
         first_response: httpx.Response = await rpc_request(
             url='/api/v1/reservation',
@@ -151,8 +156,8 @@ class TestCreateReservationMethod:
 
         second_reservation = {'reservation': {
             'coworking_id': create_coworking.id, 'place_type': 'meeting_room',
-            'session_start': datetime.datetime(2025, 5, 1, 13, 30).isoformat(),
-            'session_end': datetime.datetime(2025, 5, 1, 14, 30).isoformat(),
+            'session_start': datetime.datetime(2025, 5, 1, 13, 30, tzinfo=URAL_TZ).isoformat(),
+            'session_end': datetime.datetime(2025, 5, 1, 14, 30, tzinfo=URAL_TZ).isoformat(),
         }}
 
         second_response: httpx.Response = await rpc_request(
@@ -174,8 +179,8 @@ class TestCreateReservationMethod:
     ) -> None:
         first_reservation = {'reservation': {
             'coworking_id': create_coworking.id, 'place_type': 'meeting_room',
-            'session_start': datetime.datetime(2025, 5, 1, 13).isoformat(),
-            'session_end': datetime.datetime(2025, 5, 1, 14).isoformat(),
+            'session_start': datetime.datetime(2025, 5, 1, 13, tzinfo=URAL_TZ).isoformat(),
+            'session_end': datetime.datetime(2025, 5, 1, 14, tzinfo=URAL_TZ).isoformat(),
         }}
         first_response: httpx.Response = await rpc_request(
             url='/api/v1/reservation',
@@ -187,8 +192,8 @@ class TestCreateReservationMethod:
 
         second_reservation = {'reservation': {
             'coworking_id': create_coworking.id, 'place_type': 'meeting_room',
-            'session_start': datetime.datetime(2025, 5, 1, 12, 30).isoformat(),
-            'session_end': datetime.datetime(2025, 5, 1, 13, 30).isoformat(),
+            'session_start': datetime.datetime(2025, 5, 1, 12, 30, tzinfo=URAL_TZ).isoformat(),
+            'session_end': datetime.datetime(2025, 5, 1, 13, 30, tzinfo=URAL_TZ).isoformat(),
         }}
 
         second_response: httpx.Response = await rpc_request(
@@ -210,8 +215,8 @@ class TestCreateReservationMethod:
     ) -> None:
         first_reservation = {'reservation': {
             'coworking_id': create_coworking.id, 'place_type': 'meeting_room',
-            'session_start': datetime.datetime(2025, 5, 1, 13).isoformat(),
-            'session_end': datetime.datetime(2025, 5, 1, 14).isoformat(),
+            'session_start': datetime.datetime(2025, 5, 1, 13, tzinfo=URAL_TZ).isoformat(),
+            'session_end': datetime.datetime(2025, 5, 1, 14, tzinfo=URAL_TZ).isoformat(),
         }}
         first_response: httpx.Response = await rpc_request(
             url='/api/v1/reservation',
@@ -223,8 +228,8 @@ class TestCreateReservationMethod:
 
         second_reservation = {'reservation': {
             'coworking_id': create_coworking.id, 'place_type': 'meeting_room',
-            'session_start': datetime.datetime(2025, 5, 1, 12, 30).isoformat(),
-            'session_end': datetime.datetime(2025, 5, 1, 14, 30).isoformat(),
+            'session_start': datetime.datetime(2025, 5, 1, 12, 30, tzinfo=URAL_TZ).isoformat(),
+            'session_end': datetime.datetime(2025, 5, 1, 14, 30, tzinfo=URAL_TZ).isoformat(),
         }}
 
         second_response: httpx.Response = await rpc_request(
@@ -244,10 +249,20 @@ class TestCreateReservationMethod:
             create_coworking: Coworking,
             create_coworking_seat: CoworkingSeat
     ) -> None:
+        tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+        session_start = datetime.datetime(
+            year=tomorrow.year,
+            month=tomorrow.month,
+            day=tomorrow.day,
+            hour=12,
+            tzinfo=URAL_TZ
+        )
+        session_end = session_start + datetime.timedelta(hours=2)
+
         first_reservation = {'reservation': {
             'coworking_id': create_coworking.id, 'place_type': 'meeting_room',
-            'session_start': datetime.datetime(2025, 5, 1, 12).isoformat(),
-            'session_end': datetime.datetime(2025, 5, 1, 14).isoformat(),
+            'session_start': session_start.isoformat(),
+            'session_end': session_end.isoformat(),
         }}
         first_response: httpx.Response = await rpc_request(
             url='/api/v1/reservation',
@@ -257,10 +272,18 @@ class TestCreateReservationMethod:
         )
         assert not first_response.json().get('error', None)
 
+        session_start = datetime.datetime(
+            year=tomorrow.year,
+            month=tomorrow.month,
+            day=tomorrow.day,
+            hour=13, minute=30,
+            tzinfo=URAL_TZ
+        )
+        session_end = session_start + datetime.timedelta(hours=1)
         second_reservation = {'reservation': {
             'coworking_id': create_coworking.id, 'place_type': 'meeting_room',
-            'session_start': datetime.datetime(2025, 5, 1, 12, 30).isoformat(),
-            'session_end': datetime.datetime(2025, 5, 1, 13, 30).isoformat(),
+            'session_start': session_start.isoformat(),
+            'session_end': session_end.isoformat(),
         }}
 
         second_response: httpx.Response = await rpc_request(
@@ -278,10 +301,12 @@ class TestCreateReservationMethod:
             rpc_request: Callable,
             access_token: str,
     ) -> None:
+        session_start = datetime.datetime.now(tz=URAL_TZ) + datetime.timedelta(hours=1)
+        session_end = session_start - datetime.timedelta(minutes=30)
         reservation = {'reservation': {
             'coworking_id': "Random_ID", 'place_type': 'meeting_room',
-            'session_start': "2024-05-10 12:00:00",
-            'session_end': "2024-05-10 11:00:00",
+            'session_start': session_start.isoformat(),
+            'session_end': session_end.isoformat(),
         }}
         response: httpx.Response = await rpc_request(
             url='/api/v1/reservation',
@@ -301,10 +326,12 @@ class TestCreateReservationMethod:
             create_coworking_seat: CoworkingSeat,
             create_non_business_day: CoworkingEvent,
     ) -> None:
+        session_start = datetime.datetime.now(tz=URAL_TZ) + datetime.timedelta(hours=1)
+        session_end = session_start + datetime.timedelta(hours=1)
         reservation = {'reservation': {
             'coworking_id': "Random_ID", 'place_type': 'meeting_room',
-            'session_start': "2024-05-10 11:00:00",
-            'session_end': "2024-05-10 12:00:00",
+            'session_start': session_start.isoformat(),
+            'session_end': session_end.isoformat(),
         }}
         response: httpx.Response = await rpc_request(
             url='/api/v1/reservation',
@@ -334,13 +361,16 @@ class TestCreateReservationMethod:
             CoworkingSeat, coworking=coworking, label="Table_1_2",
             description="Description", place_type=PlaceType.TABLE, seats_count=1,
         )
+        session_start = datetime.datetime.now(tz=URAL_TZ) + datetime.timedelta(hours=1)
+        session_end = session_start + datetime.timedelta(hours=1)
+
         response: httpx.Response = await rpc_request(
             url='/api/v1/reservation',
             method='create_reservation',
             params={'reservation': {
                 'coworking_id': coworking.id,
-                'session_start': "2024-05-10 11:00:00",
-                'session_end': "2024-05-10 12:00:00",
+                'session_start': session_start.isoformat(),
+                'session_end': session_end.isoformat(),
                 'place_type': PlaceType.TABLE.value,
             }},
             headers={"Authorization": access_token}
@@ -354,8 +384,8 @@ class TestCreateReservationMethod:
             method='create_reservation',
             params={'reservation': {
                 'coworking_id': coworking.id,
-                'session_start': "2024-05-10 11:00:00",
-                'session_end': "2024-05-10 12:00:00",
+                'session_start': session_start.isoformat(),
+                'session_end': session_end.isoformat(),
                 'place_type': PlaceType.TABLE.value,
             }},
             headers={"Authorization": access_token}
@@ -379,14 +409,16 @@ class TestCreateReservationMethod:
             CoworkingSeat, coworking=coworking, label="Table_1_1",
             description="Description", place_type=PlaceType.TABLE, seats_count=1,
         )
+        session_start = datetime.datetime.now(tz=URAL_TZ) + datetime.timedelta(hours=1)
+        session_end = session_start + datetime.timedelta(hours=1)
 
         response: httpx.Response = await rpc_request(
             url='/api/v1/reservation',
             method='create_reservation',
             params={'reservation': {
                 'coworking_id': coworking.id,
-                'session_start': "2024-05-10 11:00:00",
-                'session_end': "2024-05-10 12:00:00",
+                'session_start': session_start.isoformat(),
+                'session_end': session_end.isoformat(),
                 'place_type': PlaceType.TABLE.value,
             }},
             headers={"Authorization": access_token}
@@ -409,13 +441,16 @@ class TestCreateReservationMethod:
             CoworkingSeat, coworking=coworking, label="Table_1_1",
             description="Description", place_type=PlaceType.MEETING_ROOM, seats_count=1,
         )
+        session_start = datetime.datetime.now(tz=URAL_TZ) + datetime.timedelta(hours=1)
+        session_end = session_start + datetime.timedelta(hours=1)
+
         response: httpx.Response = await rpc_request(
             url='/api/v1/reservation',
             method='create_reservation',
             params={'reservation': {
                 'coworking_id': coworking.id,
-                'session_start': "2024-05-10 11:00:00",
-                'session_end': "2024-05-10 12:00:00",
+                'session_start': session_start.isoformat(),
+                'session_end': session_end.isoformat(),
                 'place_type': PlaceType.TABLE.value,
             }},
             headers={"Authorization": access_token}
@@ -446,7 +481,7 @@ class TestCreateReservationMethod:
             name="Event",
             description="Event_Description",
         )
-        session_start = datetime.datetime.utcnow()
+        session_start = datetime.datetime.now(tz=URAL_TZ) + datetime.timedelta(hours=1)
         session_end = session_start + datetime.timedelta(hours=1)
         response: httpx.Response = await rpc_request(
             url='/api/v1/reservation',
@@ -499,8 +534,8 @@ class TestCancelReservation:
             Reservation,
             user_id=registered_user["id"],
             seat=seat,
-            session_start=datetime.datetime(2024, 6, 7, 10),
-            session_end=datetime.datetime(2024, 6, 7, 12),
+            session_start=datetime.datetime(2024, 6, 7, 10, tzinfo=URAL_TZ),
+            session_end=datetime.datetime(2024, 6, 7, 12, tzinfo=URAL_TZ),
             status=BookingStatus.PASSED,
         )
         response: httpx.Response = await rpc_request(
@@ -543,8 +578,8 @@ class TestCancelReservation:
             Reservation,
             user=user,
             seat=seat,
-            session_start=datetime.datetime(2024, 6, 7, 10),
-            session_end=datetime.datetime(2024, 6, 7, 12),
+            session_start=datetime.datetime(2024, 6, 7, 10, tzinfo=URAL_TZ),
+            session_end=datetime.datetime(2024, 6, 7, 12, tzinfo=URAL_TZ),
             status=BookingStatus.PASSED,
         )
         response: httpx.Response = await rpc_request(
@@ -574,8 +609,8 @@ class TestCancelReservation:
             Reservation,
             user_id=registered_user["id"],
             seat=seat,
-            session_start=datetime.datetime(2024, 6, 7, 10),
-            session_end=datetime.datetime(2024, 6, 7, 12),
+            session_start=datetime.datetime(2024, 6, 7, 10, tzinfo=URAL_TZ),
+            session_end=datetime.datetime(2024, 6, 7, 12, tzinfo=URAL_TZ),
             status=BookingStatus.PASSED,
         )
         response: httpx.Response = await rpc_request(

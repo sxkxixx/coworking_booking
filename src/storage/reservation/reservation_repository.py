@@ -58,7 +58,7 @@ class ReservationRepository(AbstractReservationRepository):
         if seat is None:
             raise NotAllowedReservationTimeException()
         status = BookingStatus.NEW
-        if (reservation.session_start - datetime.datetime.now()) <= datetime.timedelta(minutes=30):
+        if (reservation.session_start - get_yekaterinburg_dt()) <= datetime.timedelta(minutes=30):
             status = BookingStatus.CONFIRMED
         reservation: Reservation = await self.manager.create(
             Reservation,
