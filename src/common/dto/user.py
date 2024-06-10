@@ -1,12 +1,11 @@
 import re
 from typing import Optional
-from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, field_validator, computed_field, Field, model_validator
 
 from infrastructure.config import EMAIL_DOMAINS
 
-_password_patter = re.compile(
+_password_pattern = re.compile(
     r"^(?=.*[0-9].*)"  # Check a number
     r"(?=.*[a-z].*)"  # Check a-z
     r"(?=.*[A-Z].*)"  # Check A-Z 
@@ -27,7 +26,7 @@ class UserCreateDTO(BaseModel):
     def validate_password(cls, pwd: str) -> str:
         if len(pwd) < 8:
             raise ValueError('Password length gte 8 chars')
-        if _password_patter.match(pwd) is None:
+        if _password_pattern.match(pwd) is None:
             raise ValueError("Password does not match the pattern")
         return pwd
 
@@ -41,13 +40,14 @@ class UserCreateDTO(BaseModel):
 
 
 class UserResponseDTO(BaseModel):
-    id: UUID
+    id: str
     email: EmailStr
     last_name: str
     first_name: str
     patronymic: Optional[str] = None
     is_student: bool
     avatar_filename: Optional[str] = None
+    is_admin: bool = Field(default=False)
     telegram_chat_id: Optional[int] = Field(..., exclude=True)
 
     @computed_field
@@ -89,7 +89,7 @@ class ChangePasswordRequest(BaseModel):
     @field_validator('password')
     @classmethod
     def validate_pattern(cls, password: str) -> str:
-        if _password_patter.match(password) is None:
+        if _password_pattern.match(password) is None:
             raise ValueError('Password does not match the pattern')
         return password
 

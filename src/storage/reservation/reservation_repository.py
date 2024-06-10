@@ -10,6 +10,7 @@ from common.exceptions.application import (
     CoworkingNonBusinessDayException,
     NotAllowedReservationTimeException, CoworkingNotExistsException
 )
+from common.utils import get_yekaterinburg_dt
 from infrastructure.database import Reservation, CoworkingSeat, Coworking, CoworkingEvent, User
 from infrastructure.database.enum import BookingStatus
 from storage.reservation import AbstractReservationRepository
@@ -19,12 +20,12 @@ class ReservationRepository(AbstractReservationRepository):
     def __init__(self, manager: Manager) -> None:
         self.manager = manager
 
-    async def get_user_reservations(self, user_id) -> List[Reservation]:
+    async def get_user_reservations(self, user: User) -> List[Reservation]:
         query = (
             Reservation.select()
             .where(
-                (Reservation.user.id == user_id) &
-                (Reservation.session_start.date() >= date.today()) &
+                (Reservation.user == user) &
+                (Reservation.session_end >= get_yekaterinburg_dt()) &
                 (Reservation.status != BookingStatus.CANCELLED)
             )
             .join(CoworkingSeat)
@@ -57,7 +58,7 @@ class ReservationRepository(AbstractReservationRepository):
         if seat is None:
             raise NotAllowedReservationTimeException()
         status = BookingStatus.NEW
-        if (reservation.session_start - datetime.datetime.now()) <= datetime.timedelta(minutes=30):
+        if (reservation.session_start - get_yekaterinburg_dt()) <= datetime.timedelta(minutes=30):
             status = BookingStatus.CONFIRMED
         reservation: Reservation = await self.manager.create(
             Reservation,
@@ -91,4 +92,12 @@ class ReservationRepository(AbstractReservationRepository):
         await self.manager.update(reservation)
 
     async def get(self, reservation_id: int) -> Optional[Reservation]:
-        return await self.manager.get_or_none(Reservation, Reservation.id == reservation_id)
+        try:
+            query = (
+                Reservation.select()
+                .where(Reservation.id == reservation_id)
+                .join(User)
+            )
+            return await (await self.manager.execute(query)).fetchone()
+        except Exception:
+            pass

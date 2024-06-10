@@ -9,12 +9,6 @@ from .seats import SeatResponseDTO
 from .tech_capability import TechCapabilitySchema
 
 
-class CalendarCoworking(BaseModel):
-    id: str
-    avatar_filename: str
-    title: str
-
-
 class CoworkingCreateDTO(BaseModel):
     title: str
     institute: str

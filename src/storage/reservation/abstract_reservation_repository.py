@@ -2,12 +2,12 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 
 from common.dto.reservation import ReservationCreateRequest
-from infrastructure.database import Reservation
+from infrastructure.database import Reservation, User
 
 
 class AbstractReservationRepository(ABC):
     @abstractmethod
-    async def get_user_reservations(self, user_id) -> List[Reservation]:
+    async def get_user_reservations(self, user: User) -> List[Reservation]:
         raise NotImplementedError()
 
     @abstractmethod

@@ -1,6 +1,7 @@
 import datetime
 
 from pydantic import BaseModel
+
 from infrastructure.database.enum import Weekday
 
 

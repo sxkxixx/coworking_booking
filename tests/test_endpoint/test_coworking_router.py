@@ -1,7 +1,7 @@
 import logging
 import os
-from datetime import datetime, date
-from typing import Callable
+from datetime import datetime, date, timezone, timedelta
+from typing import Callable, Dict, Any
 
 import httpx
 import pytest
@@ -18,6 +18,7 @@ from infrastructure.database import (
 from infrastructure.database.enum import PlaceType, BookingStatus
 
 coworking_url = "/api/v1/coworking"
+URAL_TZ = timezone(offset=timedelta(hours=+5))
 
 
 class TestGetCoworkingById:
@@ -37,12 +38,12 @@ class TestGetCoworkingByTimestampRange:
     @pytest.mark.parametrize(
         "input_from, input_to",
         [
-            ("2024-05-20T10:30:00", "2024-05-20T12:30:00"),
-            ("2024-05-20T10:00:00", "2024-05-20T12:16:00"),
-            ("2024-05-20T10:00:00", "2024-05-20T10:01:00"),
-            ("2024-05-20T00:00:00", "2024-05-20T01:00:00"),
-            ("2024-05-20T19:30:00", "2024-05-20T20:30:00"),
-            ("2024-05-20T23:30:00", "2024-05-20T23:59:00")
+            ("2024-05-20T10:30:00+05:00", "2024-05-20T12:30:00+05:00"),
+            ("2024-05-20T10:00:00+05:00", "2024-05-20T12:16:00+05:00"),
+            ("2024-05-20T10:00:00+05:00", "2024-05-20T10:01:00+05:00"),
+            ("2024-05-20T00:00:00+05:00", "2024-05-20T01:00:00+05:00"),
+            ("2024-05-20T19:30:00+05:00", "2024-05-20T20:30:00+05:00"),
+            ("2024-05-20T23:30:00+05:00", "2024-05-20T23:59:00+05:00")
         ]
     )
     async def test_no_any_coworking(
@@ -67,7 +68,7 @@ class TestGetCoworkingByTimestampRange:
         """
         Проверяет, что сработает валидация, поскольку конец интервала не больше чем начал
         """
-        interval = {"from": "2024-05-20T12:30:00", "to": "2024-05-20T11:30:00"}
+        interval = {"from": "2024-05-20T12:30:00+05:00", "to": "2024-05-20T11:30:00+05:00"}
         response: httpx.Response = await rpc_request(
             url=coworking_url, method="available_coworking_by_timestamp",
             params={"interval": interval}
@@ -80,7 +81,7 @@ class TestGetCoworkingByTimestampRange:
         """
         Проверяет, что сработает валидация, поскольку даты в интервале различаются по дню
         """
-        interval = {"from": "2024-05-21T11:30:00", "to": "2024-05-20T12:30:00"}
+        interval = {"from": "2024-05-21T11:30:00+05:00", "to": "2024-05-20T12:30:00+05:00"}
         response: httpx.Response = await rpc_request(
             url=coworking_url, method="available_coworking_by_timestamp",
             params={"interval": interval}
@@ -99,7 +100,7 @@ class TestGetCoworkingByTimestampRange:
         потому нет временного конфликта
         """
         coworking_id = os.urandom(16).hex()
-        interval = {"from": "2024-05-20T12:30:00", "to": "2024-05-20T13:30:00"}
+        interval = {"from": "2024-05-20T12:30:00+05:00", "to": "2024-05-20T13:30:00+05:00"}
         user: User = await db_manager.create(
             User,
             email="correct@urfu.me",
@@ -121,8 +122,8 @@ class TestGetCoworkingByTimestampRange:
             Reservation,
             user=user,
             seat=seat,
-            session_start=datetime(2024, 5, 20, 10),
-            session_end=datetime(2024, 5, 20, 12),
+            session_start=datetime(2024, 5, 20, 10, tzinfo=URAL_TZ),
+            session_end=datetime(2024, 5, 20, 12, tzinfo=URAL_TZ),
             status=BookingStatus.NEW
         )
 
@@ -140,16 +141,22 @@ class TestGetCoworkingByTimestampRange:
     @pytest.mark.parametrize(
         "input_from, input_to, session_start, session_end", [
             (
-                    "2024-05-20T12:30:00", "2024-05-20T13:30:00",
-                    datetime(2024, 5, 20, 12), datetime(2024, 5, 20, 13)
+                    "2024-05-20T12:30:00+05:00",
+                    "2024-05-20T13:30:00+05:00",
+                    datetime(2024, 5, 20, 12, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 13, tzinfo=URAL_TZ)
             ),
             (
-                    "2024-05-20T12:00:00", "2024-05-20T13:00:00",
-                    datetime(2024, 5, 20, 12), datetime(2024, 5, 20, 13)
+                    "2024-05-20T12:00:00+05:00",
+                    "2024-05-20T13:00:00+05:00",
+                    datetime(2024, 5, 20, 12, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 13, tzinfo=URAL_TZ)
             ),
             (
-                    "2024-05-20T12:30:00", "2024-05-20T13:30:00",
-                    datetime(2024, 5, 20, 13), datetime(2024, 5, 20, 14)
+                    "2024-05-20T12:30:00+05:00",
+                    "2024-05-20T13:30:00+05:00",
+                    datetime(2024, 5, 20, 13, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 14, tzinfo=URAL_TZ)
             ),
         ]
     )
@@ -204,16 +211,19 @@ class TestGetCoworkingByTimestampRange:
         "input_from, input_to, session_start, session_end",
         [
             (
-                    "2024-05-20T12:00:00", "2024-05-20T13:00:00",
-                    datetime(2024, 5, 20, 12, 30), datetime(2024, 5, 20, 13, 30)
+                    "2024-05-20T12:00:00+05:00", "2024-05-20T13:00:00+05:00",
+                    datetime(2024, 5, 20, 12, 30, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 13, 30, tzinfo=URAL_TZ)
             ),
             (
-                    "2024-05-20T12:00:00", "2024-05-20T13:00:00",
-                    datetime(2024, 5, 20, 11, 30), datetime(2024, 5, 20, 12, 30)
+                    "2024-05-20T12:00:00+05:00", "2024-05-20T13:00:00+05:00",
+                    datetime(2024, 5, 20, 11, 30, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 12, 30, tzinfo=URAL_TZ)
             ),
             (
-                    "2024-05-20T12:00:00", "2024-05-20T13:00:00",
-                    datetime(2024, 5, 20, 12, 00), datetime(2024, 5, 20, 13, 00)
+                    "2024-05-20T12:00:00+05:00", "2024-05-20T13:00:00+05:00",
+                    datetime(2024, 5, 20, 12, 00, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 13, 00, tzinfo=URAL_TZ)
             )
         ]
     )
@@ -271,28 +281,28 @@ class TestGetCoworkingByTimestampRange:
         "input_from, input_to, session_start_1, session_end_1, session_start_2, session_end_2",
         [
             (
-                    "2024-05-20T14:00:00",
-                    "2024-05-20T15:00:00",
-                    datetime(2024, 5, 20, 12),
-                    datetime(2024, 5, 20, 13),
-                    datetime(2024, 5, 20, 16),
-                    datetime(2024, 5, 20, 17)
+                    "2024-05-20T14:00:00+05:00",
+                    "2024-05-20T15:00:00+05:00",
+                    datetime(2024, 5, 20, 12, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 13, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 16, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 17, tzinfo=URAL_TZ)
             ),
             (
-                    "2024-05-20T14:00:00",
-                    "2024-05-20T15:00:00",
-                    datetime(2024, 5, 20, 13),
-                    datetime(2024, 5, 20, 13, 59),
-                    datetime(2024, 5, 20, 15, 1),
-                    datetime(2024, 5, 20, 16)
+                    "2024-05-20T14:00:00+05:00",
+                    "2024-05-20T15:00:00+05:00",
+                    datetime(2024, 5, 20, 13, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 13, 59, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 15, 1, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 16, tzinfo=URAL_TZ)
             ),
             (
-                    "2024-05-20T14:00:00",
-                    "2024-05-20T15:00:00",
-                    datetime(2024, 5, 20, 13),
-                    datetime(2024, 5, 20, 14),
-                    datetime(2024, 5, 20, 15),
-                    datetime(2024, 5, 20, 16)
+                    "2024-05-20T14:00:00+05:00",
+                    "2024-05-20T15:00:00+05:00",
+                    datetime(2024, 5, 20, 13, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 14, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 15, tzinfo=URAL_TZ),
+                    datetime(2024, 5, 20, 16, tzinfo=URAL_TZ)
             ),
         ]
     )
@@ -365,18 +375,21 @@ class TestGetCoworkingByTimestampRange:
             Coworking, avatar="image.png", title="Title", id=os.urandom(16).hex(),
             institute="IRIT RTF", description="Description", address="Mira 32",
         )
+        today = date.today()
         await db_manager.create(
             CoworkingEvent,
-            coworking=coworking, date=date(2024, 5, 20), name="null",
+            coworking=coworking, date=today, name="null",
         )
-        interval = {"from": "2024-05-20T14:00:00", "to": "2024-05-20T15:00:00"}
+        _from = datetime.now(tz=URAL_TZ) + timedelta(minutes=30)
+        _to = _from + timedelta(hours=1)
+        interval = {"from": _from.isoformat(), "to": _to.isoformat()}
         response: httpx.Response = await rpc_request(
             url=coworking_url,
             method="available_coworking_by_timestamp",
             params={"interval": interval}
         )
         json_ = response.json()
-        assert len(json_["result"]) == 0
+        assert len(json_["result"]) == 0, json_
 
     @pytest.mark.asyncio
     async def test_with_out_of_working_schedule(
@@ -395,10 +408,10 @@ class TestGetCoworkingByTimestampRange:
             WorkingSchedule,
             coworking=coworking,
             week_day=0,
-            start_time=datetime(2024, 5, 20, 12),
-            end_time=datetime(2024, 5, 20, 16),
+            start_time=datetime(2024, 5, 20, 12, tzinfo=URAL_TZ),
+            end_time=datetime(2024, 5, 20, 16, tzinfo=URAL_TZ),
         )
-        left_interval = {"from": "2024-05-20T10:00:00", "to": "2024-05-20T11:00:00"}
+        left_interval = {"from": "2024-05-20T10:00:00+05:00", "to": "2024-05-20T11:00:00+05:00"}
         response: httpx.Response = await rpc_request(
             url=coworking_url,
             method="available_coworking_by_timestamp",
@@ -407,7 +420,7 @@ class TestGetCoworkingByTimestampRange:
         json_ = response.json()
         assert len(json_["result"]) == 0
 
-        right_interval = {"from": "2024-05-20T17:00:00", "to": "2024-05-20T18:00:00"}
+        right_interval = {"from": "2024-05-20T17:00:00+05:00", "to": "2024-05-20T18:00:00+05:00"}
         response: httpx.Response = await rpc_request(
             url=coworking_url,
             method="available_coworking_by_timestamp",
@@ -415,3 +428,109 @@ class TestGetCoworkingByTimestampRange:
         )
         json_ = response.json()
         assert len(json_["result"]) == 0
+
+
+class TestSearchCoworking:
+    @pytest.mark.asyncio
+    async def test_no_coworkings(self, rpc_request: Callable) -> None:
+        response: httpx.Response = await rpc_request(
+            url=coworking_url,
+            method="get_coworking_by_search_params",
+            params={"search": {"title": "коворкинг"}},
+        )
+        json_: Dict[str, Any] = response.json()
+        assert json_.get("error", None) is None
+        assert len(json_["result"]) == 0
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "title",
+        [
+            "радиоточка",
+            "РАДИОТОЧКА",
+            "рАдИоТоЧкА",
+            "РаДио",
+            "ТОЧка",
+            "диоточ",
+        ]
+    )
+    async def test_search_radiotochka_by_title(
+            self,
+            rpc_request: Callable,
+            db_manager: Manager,
+            title: str,
+    ) -> None:
+        await db_manager.create(
+            Coworking,
+            title="Радиоточка",
+            institute="ИРИТ РТФ",
+            description="Описание радиоточки",
+            address="ул. Мира, д. 32",
+        )
+        response: httpx.Response = await rpc_request(
+            url=coworking_url,
+            method="get_coworking_by_search_params",
+            params={"search": {"title": title}}
+        )
+        json_: Dict[str, Any] = response.json()
+        assert json_.get("error", None) is None
+        assert len(json_["result"]) == 1
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "institute",
+        [
+            "ирит",
+            "ртф",
+            "ирит ртф",
+            "ИРИТ РТФ",
+        ]
+    )
+    async def test_search_by_institute(
+            self,
+            rpc_request: Callable,
+            db_manager: Manager,
+            institute: str
+    ) -> None:
+        await db_manager.create(
+            Coworking,
+            title="Радиоточка",
+            institute="ИРИТ РТФ",
+            description="Описание радиоточки",
+            address="ул. Мира, д. 32",
+        )
+        response: httpx.Response = await rpc_request(
+            url=coworking_url,
+            method="get_coworking_by_search_params",
+            params={"search": {"institute": institute}}
+        )
+        json_: Dict[str, Any] = response.json()
+        assert json_.get("error", None) is None
+        assert len(json_["result"]) == 1
+
+    @pytest.mark.asyncio
+    async def test_result_search_is_empty(
+            self,
+            rpc_request: Callable,
+            db_manager: Manager,
+    ) -> None:
+        await db_manager.create(
+            Coworking,
+            title="Радиоточка",
+            institute="ИРИТ РТФ",
+            description="Описание радиоточки",
+            address="ул. Мира, д. 32",
+        )
+        search_queries = [
+            "Антресоли", "антресоли", "FYNHTCJKB",
+            "Территория интеллектуального роста", "РОСТА",
+            "Катушка", "кАТУШКА"
+        ]
+        for title in search_queries:
+            response: httpx.Response = await rpc_request(
+                url=coworking_url,
+                method="get_coworking_by_search_params",
+                params={"search": {"title": title}}
+            )
+            json_: Dict[str, Any] = response.json()
+            assert len(json_["result"]) == 0

@@ -1,3 +1,5 @@
+import datetime
+import logging
 from typing import List, Optional
 
 import fastapi_jsonrpc as jsonrpc
@@ -9,6 +11,8 @@ from common.exceptions.rpc import CoworkingDoesNotExistException
 from infrastructure.database import Coworking, WorkingSchedule
 from storage.coworking import AbstractCoworkingRepository
 from .abstract_rpc_router import AbstractRPCRouter
+
+logger = logging.getLogger(__name__)
 
 
 class CoworkingRouter(AbstractRPCRouter):
@@ -23,31 +27,61 @@ class CoworkingRouter(AbstractRPCRouter):
         return entrypoint
 
     async def get_coworking(self, coworking_id: str) -> CoworkingDetailDTO:
+        logger.info("Requested coworking with id=%s", coworking_id)
         coworking: Optional[Coworking] = await self.coworking_repository.get_coworking_by_id(
             coworking_id)
         if not coworking:
+            logger.error("Coworking with id=%s not found", coworking_id)
             raise CoworkingDoesNotExistException()
+        logger.info("Response Coworking(id=%s, title=%s)", coworking.id, coworking.title)
         return CoworkingDetailDTO.model_validate(coworking, from_attributes=True)
 
     async def get_coworking_by_search_params(
             self, search: SearchParams
     ) -> List[CoworkingResponseDTO]:
         """Поля title, institute могут быть равны значению null"""
-        coworking_list = await self.coworking_repository.find_by_search_params(search)
-        response_data = [
-            CoworkingResponseDTO.model_validate(coworking, from_attributes=True)
-            for coworking in coworking_list
-        ]
-        return response_data
+        logger.info(
+            "Searching coworkings by params title = %s, institute = %s",
+            search.title,
+            search.institute
+        )
+        coworkings: List[Coworking] = await self.coworking_repository.find_by_search_params(search)
+        result = []
+        for coworking in coworkings:
+            logger.info("Founded Coworking(id=%s, title=%s)", coworking.id, coworking.title)
+            working_schedule: Optional[WorkingSchedule] = (
+                await self.coworking_repository.get_coworking_schedule_at_day(datetime.date.today())
+            )
+            result.append(
+                CoworkingResponseDTO(
+                    id=coworking.id,
+                    avatar=coworking.avatar,
+                    title=coworking.title,
+                    institute=coworking.institute,
+                    description=coworking.description,
+                    address=coworking.address,
+                    working_schedule=ScheduleResponseDTO.model_validate(
+                        working_schedule, from_attributes=True
+                    ) if working_schedule else None,
+                )
+            )
+        logger.info("Founded %s coworkings", len(result))
+        return result
 
     async def available_coworking_by_timestamp(
             self, interval: TimestampRange
     ) -> List[CoworkingResponseDTO]:
+        logger.info(
+            "Request coworking with interval(start=%s, end=%s)",
+            interval.start,
+            interval.end
+        )
         available_coworking_list: List[Coworking] = (
             await self.coworking_repository.select_filter_by_timestamp_range(interval)
         )
         result = []
         for coworking in available_coworking_list:
+            logger.info("Founded Coworking(id=%s, title=%s)", coworking.id, coworking.title)
             working_time: Optional[WorkingSchedule] = (
                 await self.coworking_repository.get_coworking_schedule_at_day(interval.start)
             )

@@ -7,7 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from jinja2 import FileSystemLoader
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from common.dependencies.auth import AuthRequired
 from common.hasher import Hasher
 from common.service.reset_password_send_service import PasswordResetSendService
 from common.session import TokenService
@@ -29,6 +28,7 @@ from infrastructure.config import (
 )
 from infrastructure.database.db import manager, database
 from infrastructure.database.models import *
+from infrastructure.logging import configure_logging
 from storage.coworking import CoworkingRepository
 from storage.coworking_event import CoworkingEventRepository
 from storage.password_reset_token import PasswordResetTokenRepository
@@ -59,6 +59,8 @@ async def lifespan(_api: jsonrpc.API):
 
 def _create_app() -> jsonrpc.API:
     # Initialize settings
+    configure_logging()
+
     application_settings = ApplicationSettings()
     redis_settings = RedisSettings()
     object_storage_settings = ObjectStorageSettings()
@@ -107,7 +109,6 @@ def _create_app() -> jsonrpc.API:
     )
 
     # Middlewares
-    auth_middleware = AuthMiddleware(token_service, user_repository)
 
     # Create app and register routers
     _app = jsonrpc.API(lifespan=lifespan)
@@ -119,6 +120,7 @@ def _create_app() -> jsonrpc.API:
     _app.bind_entrypoint(user_settings_router.build_entrypoint())
     _app.bind_entrypoint(admin_coworking_router.build_entrypoint())
 
+    auth_middleware = AuthMiddleware(token_service, user_repository)
     _app.add_middleware(BaseHTTPMiddleware, dispatch=auth_middleware)
 
     _app.add_middleware(

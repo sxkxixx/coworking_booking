@@ -43,10 +43,10 @@ class CoworkingRepository(AbstractCoworkingRepository):
 
     async def find_by_search_params(self, search_params: SearchParams) -> List[Coworking]:
         not_null_filter_dict = search_params.model_dump(exclude_none=True)
-        query = Coworking.select()
+        query: peewee.ModelSelect = Coworking.select()
         for attr, value in not_null_filter_dict.items():
-            query = query.where(getattr(Coworking, attr) == value)
-        # query = query.join(CoworkingImages, peewee.JOIN.LEFT_OUTER)
+            entity_attr: peewee.Field = getattr(Coworking, attr)
+            query = query.where(entity_attr.contains(value.strip()))
         return await self.manager.execute(query)
 
     async def select_filter_by_timestamp_range(self, interval: TimestampRange) -> List[Coworking]:
