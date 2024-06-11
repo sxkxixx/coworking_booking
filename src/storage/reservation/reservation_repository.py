@@ -1,3 +1,4 @@
+import logging
 from datetime import date, datetime, timedelta
 from typing import List, Optional
 
@@ -9,9 +10,17 @@ from common.exceptions.application import (
     CoworkingNonBusinessDayException,
     NotAllowedReservationTimeException, CoworkingNotExistsException
 )
-from infrastructure.database import Reservation, CoworkingSeat, Coworking, CoworkingEvent, User
+from infrastructure.database import (
+    Reservation,
+    CoworkingSeat,
+    Coworking,
+    CoworkingEvent,
+    User
+)
 from infrastructure.database.enum import BookingStatus
 from storage.reservation import AbstractReservationRepository
+
+logger = logging.getLogger(__name__)
 
 
 class ReservationRepository(AbstractReservationRepository):
@@ -32,9 +41,11 @@ class ReservationRepository(AbstractReservationRepository):
         )
         return await self.manager.execute(query)
 
-    async def create(self, user: User, reservation: ReservationCreateRequest) -> Reservation:
+    async def create(self, user: User,
+                     reservation: ReservationCreateRequest) -> Reservation:
         await self.check_coworking_exists(reservation.coworking_id)
-        await self.check_business_day(reservation.coworking_id, reservation.session_start.date())
+        await self.check_business_day(reservation.coworking_id,
+                                      reservation.session_start.date())
         is_allowed_query = (
             CoworkingSeat.select()
             .where(CoworkingSeat.place_type == reservation.place_type)
@@ -50,7 +61,8 @@ class ReservationRepository(AbstractReservationRepository):
             )
         )
         try:
-            seat: Optional[CoworkingSeat] = await self.manager.get_or_none(is_allowed_query)
+            seat: Optional[CoworkingSeat] = await self.manager.get_or_none(
+                is_allowed_query)
         except AttributeError:
             seat = None
         if seat is None:
@@ -92,10 +104,15 @@ class ReservationRepository(AbstractReservationRepository):
     async def get(self, reservation_id: int) -> Optional[Reservation]:
         try:
             query = (
-                Reservation.select()
+                Reservation.select(Reservation, User)
                 .where(Reservation.id == reservation_id)
                 .join(User)
             )
-            return await (await self.manager.execute(query)).fetchone()
-        except Exception:
+            reservation = await self.manager.get_or_none(query)
+            return reservation
+        except Exception as exc:
+            logger.exception(
+                "Failed to fetch Reservation(id=%s) with exc = %s",
+                reservation_id, exc
+            )
             pass

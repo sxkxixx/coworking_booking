@@ -586,3 +586,39 @@ class TestCancelReservation:
         )
         json_: Dict[str, Any] = response.json()
         assert json_['error']['code'] == -32005
+
+    @pytest.mark.asyncio
+    async def test_successful_cancel(
+            self,
+            db_manager: Manager,
+            registered_user: Dict[str, Any],
+            access_token: str,
+            rpc_request: Callable
+    ) -> None:
+        coworking: Coworking = await db_manager.create(
+            Coworking, title="a", institute="a", description="a", address="a",
+        )
+        seat: CoworkingSeat = await db_manager.create(
+            CoworkingSeat, coworking=coworking, place_type=PlaceType.TABLE,
+            seats_count=1,
+        )
+        reservation: Reservation = await db_manager.create(
+            Reservation,
+            user_id=registered_user["id"],
+            seat=seat,
+            session_start=datetime.datetime(2024, 6, 7, 10),
+            session_end=datetime.datetime(2024, 6, 7, 12),
+            status=BookingStatus.CONFIRMED,
+        )
+        response: httpx.Response = await rpc_request(
+            url="/api/v1/reservation",
+            method="cancel_reservation",
+            params={"reservation_id": reservation.id},
+            headers={"Authorization": access_token},
+        )
+        json_ = response.json()
+        assert json_["result"] is None
+        booking: Reservation = await db_manager.get(
+            Reservation, Reservation.id == reservation.id
+        )
+        assert booking.status == BookingStatus.CANCELLED
