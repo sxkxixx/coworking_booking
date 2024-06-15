@@ -4,7 +4,7 @@ from typing import List, Optional
 import fastapi_jsonrpc as jsonrpc
 from fastapi import UploadFile, File, HTTPException
 
-from common.context import CONTEXT_USER
+from common.decorators import admin_required, rest_admin
 from common.dto.coworking import CoworkingCreateDTO, CoworkingResponseDTO
 from common.dto.coworking_event import CoworkingEventSchema, CoworkingEventResponseSchema
 from common.dto.coworking_seat import CoworkingSeatResponse, CreateSeatDTO
@@ -16,7 +16,7 @@ from common.exceptions.rpc import (
     NotAdminException
 )
 from common.utils.image_validators import is_valid_image_signature
-from infrastructure.database import Coworking, TechCapability, CoworkingEvent, CoworkingSeat, User
+from infrastructure.database import Coworking, TechCapability, CoworkingEvent, CoworkingSeat
 from storage.coworking import AbstractCoworkingRepository
 from storage.coworking_event import AbstractCoworkingEventRepository
 from storage.s3_repository import S3Repository
@@ -63,22 +63,18 @@ class AdminCoworkingRouter(AbstractRPCRouter):
         )
         return entrypoint
 
+    @admin_required
     async def create_coworking(self, coworking: CoworkingCreateDTO) -> CoworkingResponseDTO:
-        self.__check_admin()
         coworking: Coworking = await self.coworking_repository.create_coworking(coworking)
         return CoworkingResponseDTO.model_validate(coworking, from_attributes=True)
 
+    @rest_admin
     async def upload_coworking_avatar(
             self,
             coworking_id: str,
             image: UploadFile = File()
     ) -> str:
-        self.__check_admin(True)
-        if not await is_valid_image_signature(image):
-            raise HTTPException(
-                status_code=http.HTTPStatus.BAD_REQUEST,
-                detail="Invalid image signature"
-            )
+        await self.__validate_image_file(image)
         coworking: Optional[Coworking] = await self.coworking_repository.get(coworking_id)
         if not coworking:
             raise HTTPException(status_code=http.HTTPStatus.NOT_FOUND.value)
@@ -86,17 +82,13 @@ class AdminCoworkingRouter(AbstractRPCRouter):
         await self.coworking_repository.set_avatar_filename(coworking, avatar_image_filename)
         return avatar_image_filename
 
+    @rest_admin
     async def add_coworking_image(
             self,
             coworking_id: str,
             image: UploadFile = File(),
     ) -> str:
-        self.__check_admin(True)
-        if not await is_valid_image_signature(image):
-            raise HTTPException(
-                status_code=http.HTTPStatus.BAD_REQUEST,
-                detail="Invalid image signature"
-            )
+        await self.__validate_image_file(image)
         coworking: Optional[Coworking] = await self.coworking_repository.get(coworking_id)
         if not coworking:
             raise HTTPException(status_code=http.HTTPStatus.NOT_FOUND.value)
@@ -104,12 +96,12 @@ class AdminCoworkingRouter(AbstractRPCRouter):
         await self.coworking_repository.create_coworking_image(coworking, image_filename)
         return image_filename
 
+    @admin_required
     async def create_coworking_tech_capabilities(
             self,
             coworking_id: str,
             capabilities: List[TechCapabilitySchema]
     ) -> List[TechCapabilitySchema]:
-        self.__check_admin()
         coworking: Optional[Coworking] = await self.coworking_repository.get(coworking_id)
         if not coworking:
             raise CoworkingDoesNotExistException()
@@ -121,25 +113,25 @@ class AdminCoworkingRouter(AbstractRPCRouter):
             for item in capabilities
         ]
 
+    @admin_required
     async def create_coworking_event(
             self,
             coworking_id: str,
             event: CoworkingEventSchema
     ) -> CoworkingEventResponseSchema:
-        self.__check_admin()
         coworking: Optional[Coworking] = await self.coworking_repository.get(coworking_id)
         if not coworking:
             raise CoworkingDoesNotExistException()
         event: CoworkingEvent = await self.coworking_event_repository.create(coworking, event)
         return CoworkingEventResponseSchema.model_validate(event, from_attributes=True)
 
+    @admin_required
     async def register_coworking_seats(
             self,
             coworking_id: str,
             table_places: int,
             meeting_rooms: List[CreateSeatDTO]
     ) -> List[CoworkingSeatResponse]:
-        self.__check_admin()
         coworking: Optional[Coworking] = await self.coworking_repository.get(coworking_id)
         if not coworking:
             raise CoworkingDoesNotExistException()
@@ -151,12 +143,12 @@ class AdminCoworkingRouter(AbstractRPCRouter):
             for seat in seats
         ]
 
+    @admin_required
     async def register_coworking_working_schedule(
             self,
             coworking_id: str,
             schedules: List[ScheduleCreateDTO]
     ) -> List[ScheduleResponseDTO]:
-        self.__check_admin()
         coworking: Optional[Coworking] = await self.coworking_repository.get(coworking_id)
         if not coworking:
             raise CoworkingDoesNotExistException()
@@ -167,12 +159,9 @@ class AdminCoworkingRouter(AbstractRPCRouter):
         ]
 
     @staticmethod
-    def __check_admin(is_rest: bool = False) -> User:
-        user: Optional[User] = CONTEXT_USER.get()
-        if not user:
-            if is_rest:
-                raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED)
-            raise UnauthorizedError()
-        if not user.is_admin:
-            raise NotAdminException()
-        return user
+    async def __validate_image_file(image: UploadFile) -> None:
+        if not await is_valid_image_signature(image):
+            raise HTTPException(
+                status_code=http.HTTPStatus.BAD_REQUEST,
+                detail="Invalid image signature"
+            )

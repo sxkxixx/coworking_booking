@@ -463,6 +463,62 @@ class TestCreateReservationMethod:
         assert json_.get('error')
         assert json_['error']['code'] == -32005, json_
 
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        'delta',
+        [
+            datetime.timedelta(minutes=30),
+            datetime.timedelta(minutes=-30),
+        ]
+    )
+    async def test_with_user_reservations_conflict(
+            self,
+            rpc_request: Callable,
+            db_manager: Manager,
+            access_token: str,
+            delta: datetime.timedelta,
+    ) -> None:
+        coworking: Coworking = await db_manager.create(
+            Coworking,
+            title="Антресоли", institute="ГУК", description="description", address="Мира, 19",
+        )
+        await db_manager.create(
+            CoworkingSeat, coworking=coworking, label="Table_1_1",
+            description="Description", place_type=PlaceType.MEETING_ROOM, seats_count=1,
+        )
+        await db_manager.create(
+            CoworkingSeat, coworking=coworking, label="Table", description="sadadsd",
+            place_type=PlaceType.MEETING_ROOM, seats_count=1,
+        )
+        session_start = datetime.datetime.now()
+        session_end = session_start + datetime.timedelta(hours=1)
+        response: httpx.Response = await rpc_request(
+            url='/api/v1/reservation',
+            method='create_reservation',
+            params={'reservation': {
+                'coworking_id': coworking.id, 'session_start': session_start.isoformat(),
+                'session_end': session_end.isoformat(), 'place_type': PlaceType.MEETING_ROOM.value,
+            }},
+            headers={"Authorization": access_token}
+        )
+        json_: Dict[str, Any] = response.json()
+        assert json_.get('error') is None
+
+        session_start += delta
+        session_end += delta
+
+        response: httpx.Response = await rpc_request(
+            url='/api/v1/reservation',
+            method='create_reservation',
+            params={'reservation': {
+                'coworking_id': coworking.id, 'session_start': session_start.isoformat(),
+                'session_end': session_end.isoformat(), 'place_type': PlaceType.MEETING_ROOM.value,
+            }},
+            headers={"Authorization": access_token}
+        )
+        json_ = response.json()
+        assert json_['error']['code'] == -32005
+
 
 class TestCancelReservation:
     @pytest.mark.asyncio

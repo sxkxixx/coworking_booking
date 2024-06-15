@@ -41,8 +41,11 @@ class ReservationRepository(AbstractReservationRepository):
         )
         return await self.manager.execute(query)
 
-    async def create(self, user: User,
-                     reservation: ReservationCreateRequest) -> Reservation:
+    async def create(
+            self,
+            user: User,
+            reservation: ReservationCreateRequest
+    ) -> Reservation:
         await self.check_coworking_exists(reservation.coworking_id)
         await self.check_business_day(reservation.coworking_id,
                                       reservation.session_start.date())
@@ -116,3 +119,26 @@ class ReservationRepository(AbstractReservationRepository):
                 reservation_id, exc
             )
             pass
+
+    async def is_conflict_reservation(
+            self,
+            user: User,
+            session_start: datetime,
+            session_end: datetime
+    ) -> bool:
+        query = (
+            Reservation.select()
+            .join(User)
+            .where(
+                (Reservation.user == user) &
+                (Reservation.status != BookingStatus.CANCELLED)
+            )
+            .where(
+                ~(
+                        (Reservation.session_end <= session_start) |
+                        (Reservation.session_start >= session_end)
+                )
+            )
+        )
+        result: List[Reservation] = await self.manager.execute(query)
+        return len(result) > 0

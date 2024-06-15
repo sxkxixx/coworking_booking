@@ -32,6 +32,11 @@ class ImageRouter:
         return router
 
     async def upload_avatar(self, image: UploadFile = File()) -> str:
+        """
+        Upload Avatar
+        :param image: Image file of types png, jpg, jpeg
+        :return: str (filename)
+        """
         user: Optional[User] = CONTEXT_USER.get()
         if not user:
             logger.info("Attempt to upload avatar as anonymous")
@@ -52,5 +57,9 @@ class ImageRouter:
         return filename
 
     async def response_image(self, filename: str) -> StreamingResponse:
-        """Возвращает поток байтов изображения из S3 хранилища"""
+        """
+        Streaming response of requested file
+        :param filename: Image filename
+        :return: bytes
+        """
         return StreamingResponse(self.s3_repository.get_file_stream(filename))

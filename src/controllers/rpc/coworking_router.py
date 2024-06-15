@@ -5,7 +5,7 @@ from typing import List, Optional
 import fastapi_jsonrpc as jsonrpc
 
 from common.dto.coworking import CoworkingResponseDTO, CoworkingDetailDTO
-from common.dto.input_params import TimestampRange, SearchParams
+from common.dto.input_params import TimestampInterval, SearchParams
 from common.dto.schedule import ScheduleResponseDTO
 from common.exceptions.rpc import CoworkingDoesNotExistException
 from infrastructure.database import Coworking, WorkingSchedule
@@ -27,6 +27,11 @@ class CoworkingRouter(AbstractRPCRouter):
         return entrypoint
 
     async def get_coworking(self, coworking_id: str) -> CoworkingDetailDTO:
+        """
+        Detail coworking response by id
+        :param coworking_id: Coworking ID
+        :return: CoworkingDetailDTO
+        """
         logger.info("Requested coworking with id=%s", coworking_id)
         coworking: Optional[Coworking] = await self.coworking_repository.get_coworking_by_id(
             coworking_id)
@@ -39,7 +44,11 @@ class CoworkingRouter(AbstractRPCRouter):
     async def get_coworking_by_search_params(
             self, search: SearchParams
     ) -> List[CoworkingResponseDTO]:
-        """Поля title, institute могут быть равны значению null"""
+        """
+        Search coworking list by title and institute
+        :param search: SearchParams
+        :return: List[CoworkingResponseDTO]
+        """
         logger.info(
             "Searching coworkings by params title = %s, institute = %s",
             search.title,
@@ -69,8 +78,13 @@ class CoworkingRouter(AbstractRPCRouter):
         return result
 
     async def available_coworking_by_timestamp(
-            self, interval: TimestampRange
+            self, interval: TimestampInterval
     ) -> List[CoworkingResponseDTO]:
+        """
+        Search available coworking by timestamp interval
+        :param interval: TimestampInterval
+        :return: List[CoworkingResponseDTO]
+        """
         logger.info(
             "Request coworking with interval(start=%s, end=%s)",
             interval.start,

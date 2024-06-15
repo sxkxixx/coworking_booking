@@ -32,6 +32,8 @@ logger = logging.getLogger(__name__)
 
 
 class AuthRouter(AbstractRPCRouter):
+    """Auth user router"""
+
     def __init__(
             self,
             user_repository: AbstractUserRepository,
@@ -54,6 +56,11 @@ class AuthRouter(AbstractRPCRouter):
         return entrypoint
 
     async def register(self, data: UserCreateDTO) -> UserResponseDTO:
+        """
+        Register User
+        :param data: UserCreateDTO
+        :return: UserResponseDTO
+        """
         try:
             logger.info("Registering user with email = %s", data.email)
             user: User = await self.user_repository.create(data)
@@ -64,6 +71,12 @@ class AuthRouter(AbstractRPCRouter):
         return UserResponseDTO.model_validate(user, from_attributes=True)
 
     async def login(self, data: Login, response: Response) -> TokenResponse:
+        """
+        Authentication user
+        :param data: Login
+        :param response: Response
+        :return: TokenResponse
+        """
         logger.info("Authentication user with email = %s", data.email)
         user: Optional[User] = await self.user_repository.get(User.email == data.email)
         if not user:
@@ -91,6 +104,13 @@ class AuthRouter(AbstractRPCRouter):
             request: Request,
             response: Response
     ) -> TokenResponse:
+        """
+        Refresh Session
+        :param fingerprint: Browser fingerprint
+        :param request: Request
+        :param response: Response
+        :return: TokenResponse
+        """
         session_id: Optional[str] = request.cookies.get('refresh_token')
         if not session_id:
             logger.error("No refresh_token at cookies")
@@ -125,6 +145,13 @@ class AuthRouter(AbstractRPCRouter):
         return TokenResponse(access_token=new_access_token)
 
     async def logout(self, fingerprint: str, request: Request, response: Response) -> None:
+        """
+        Delete user session
+        :param fingerprint: Fingerprint
+        :param request: Request
+        :param response: Response
+        :return: None
+        """
         session_id: Optional[str] = request.cookies.get('refresh_token')
         if not session_id:
             logger.error("No refresh_token at cookies")

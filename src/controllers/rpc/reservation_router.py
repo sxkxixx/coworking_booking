@@ -6,8 +6,11 @@ import fastapi_jsonrpc as jsonrpc
 from common.context import CONTEXT_USER
 from common.decorators import login_required
 from common.dto.coworking import CoworkingResponseDTO
-from common.dto.reservation import ReservationResponse, ReservationCreateRequest, \
+from common.dto.reservation import (
+    ReservationResponse,
+    ReservationCreateRequest,
     DetailReservationDTO
+)
 from common.dto.seats import SeatResponseDTO
 from common.exceptions.application import (
     CoworkingNonBusinessDayException,
@@ -40,6 +43,10 @@ class ReservationRouter(AbstractRPCRouter):
 
     @login_required
     async def get_user_reservations(self) -> List[DetailReservationDTO]:
+        """
+        Get user reservations
+        :return: List[DetailReservationDTO]
+        """
         user: User = CONTEXT_USER.get()
         reservations: List[Reservation] = await self.reservation_repository.get_user_reservations(
             user=user)
@@ -64,7 +71,21 @@ class ReservationRouter(AbstractRPCRouter):
     async def create_reservation(
             self, reservation: ReservationCreateRequest
     ) -> ReservationResponse:
+        """
+        Create reservation
+        :param reservation: ReservationCreateRequest
+        :return: ReservationResponse
+        """
         user: User = CONTEXT_USER.get()
+        if await self.reservation_repository.is_conflict_reservation(
+                user, reservation.session_start, reservation.session_end):
+            logger.error(
+                "User(email=%s) has a reservations conflict at {start=%s, end=%s}",
+                user.email, reservation.session_start, reservation.session_end
+            )
+            raise ReservationException(
+                {'error': 'user already has conflicting reservation this time'}
+            )
         try:
             logger.info(
                 "User(email=%s) create reservation with params = %s",
@@ -93,6 +114,11 @@ class ReservationRouter(AbstractRPCRouter):
 
     @login_required
     async def cancel_reservation(self, reservation_id: int) -> None:
+        """
+        Cancel reservation
+        :param reservation_id: Reservation ID
+        :return: None
+        """
         user: User = CONTEXT_USER.get()
         reservation: Optional[Reservation] = await self.reservation_repository.get(reservation_id)
         if not reservation:

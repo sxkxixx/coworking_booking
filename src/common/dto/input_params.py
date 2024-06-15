@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, Field, model_validator, NaiveDatetime
 
 
-class TimestampRange(BaseModel):
+class TimestampInterval(BaseModel):
     start: NaiveDatetime = Field(..., validation_alias="from")
     end: NaiveDatetime = Field(..., validation_alias="to")
 

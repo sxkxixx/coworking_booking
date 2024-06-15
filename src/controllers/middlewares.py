@@ -10,6 +10,8 @@ from storage.user import AbstractUserRepository
 
 
 class AuthMiddleware:
+    """Auth middleware"""
+
     def __init__(
             self,
             token_service: TokenService,

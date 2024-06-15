@@ -6,7 +6,7 @@ from peewee_async import Manager
 
 from common.dto.coworking import CoworkingCreateDTO
 from common.dto.coworking_seat import CreateSeatDTO
-from common.dto.input_params import SearchParams, TimestampRange
+from common.dto.input_params import SearchParams, TimestampInterval
 from common.dto.schedule import ScheduleCreateDTO
 from common.dto.tech_capability import TechCapabilitySchema
 from infrastructure.database import (
@@ -49,7 +49,7 @@ class CoworkingRepository(AbstractCoworkingRepository):
             query = query.where(entity_attr.contains(value.strip()))
         return await self.manager.execute(query)
 
-    async def select_filter_by_timestamp_range(self, interval: TimestampRange) -> List[Coworking]:
+    async def select_filter_by_timestamp_range(self, interval: TimestampInterval) -> List[Coworking]:
         query = (
             Coworking.select().distinct()
             # Фильтрация по времени работы коворкинга
