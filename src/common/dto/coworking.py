@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from .event import CoworkingResponseSchema
+from .event import CoworkingEventResponseSchema
 from .images import CoworkingImageResponse
 from .schedule import ScheduleResponseDTO
 from .seats import SeatResponseDTO
@@ -36,5 +36,5 @@ class CoworkingDetailDTO(BaseModel):
     seats: List[SeatResponseDTO]
     working_schedules: List[ScheduleResponseDTO]
     images: List[CoworkingImageResponse]
-    events: List[CoworkingResponseSchema]
+    events: List[CoworkingEventResponseSchema]
     technical_capabilities: List[TechCapabilitySchema]
