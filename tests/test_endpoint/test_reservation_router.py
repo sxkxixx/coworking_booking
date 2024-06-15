@@ -354,8 +354,8 @@ class TestCreateReservationMethod:
             method='create_reservation',
             params={'reservation': {
                 'coworking_id': coworking.id,
-                'session_start': "2024-05-10 11:00:00",
-                'session_end': "2024-05-10 12:00:00",
+                'session_start': "2024-05-10 12:00:00",
+                'session_end': "2024-05-10 13:00:00",
                 'place_type': PlaceType.TABLE.value,
             }},
             headers={"Authorization": access_token}
