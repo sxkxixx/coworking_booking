@@ -3,7 +3,6 @@ import os
 from typing import Optional
 
 import peewee
-
 from .db import database
 from .enum import OnDelete, Weekday, PlaceType, BookingStatus, PasswordTokenEnum
 from .fields import CharEnum, IntegerEnum
@@ -57,7 +56,7 @@ class Coworking(peewee.Model):
 
 
 class WorkingSchedule(peewee.Model):
-    id = peewee.BigAutoField(primary_key=True)
+    id: int = peewee.BigAutoField(primary_key=True)
     coworking: Coworking = peewee.ForeignKeyField(
         Coworking, backref='working_schedules', on_delete=OnDelete.RESTRICT.value
     )
@@ -84,7 +83,7 @@ class CoworkingSeat(peewee.Model):
 
 
 class Reservation(peewee.Model):
-    id = peewee.BigAutoField(primary_key=True)
+    id: int = peewee.BigAutoField(primary_key=True)
     user: User = peewee.ForeignKeyField(
         User, backref='user_bookings', on_delete=OnDelete.CASCADE.value
     )
@@ -102,7 +101,7 @@ class Reservation(peewee.Model):
 
 
 class CoworkingImages(peewee.Model):
-    id = peewee.IntegerField(primary_key=True)
+    id: int = peewee.BigAutoField(primary_key=True)
     coworking: Coworking = peewee.ForeignKeyField(
         Coworking, null=False, on_delete=OnDelete.CASCADE.value, backref='images'
     )
@@ -114,7 +113,7 @@ class CoworkingImages(peewee.Model):
 
 
 class CoworkingEvent(peewee.Model):
-    id = peewee.BigAutoField(primary_key=True)
+    id: int = peewee.BigAutoField(primary_key=True)
     coworking: Coworking = peewee.ForeignKeyField(
         Coworking, null=False, on_delete=OnDelete.CASCADE.value, backref='events'
     )

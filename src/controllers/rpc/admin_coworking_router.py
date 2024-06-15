@@ -73,7 +73,7 @@ class AdminCoworkingRouter(AbstractRPCRouter):
             coworking_id: str,
             image: UploadFile = File()
     ) -> str:
-        self.__check_admin()
+        self.__check_admin(True)
         if not await is_valid_image_signature(image):
             raise HTTPException(
                 status_code=http.HTTPStatus.BAD_REQUEST,
@@ -91,7 +91,7 @@ class AdminCoworkingRouter(AbstractRPCRouter):
             coworking_id: str,
             image: UploadFile = File(),
     ) -> str:
-        self.__check_admin()
+        self.__check_admin(True)
         if not await is_valid_image_signature(image):
             raise HTTPException(
                 status_code=http.HTTPStatus.BAD_REQUEST,
@@ -167,9 +167,11 @@ class AdminCoworkingRouter(AbstractRPCRouter):
         ]
 
     @staticmethod
-    def __check_admin() -> User:
+    def __check_admin(is_rest: bool = False) -> User:
         user: Optional[User] = CONTEXT_USER.get()
         if not user:
+            if is_rest:
+                raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED)
             raise UnauthorizedError()
         if not user.is_admin:
             raise NotAdminException()

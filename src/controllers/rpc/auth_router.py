@@ -73,7 +73,7 @@ class AuthRouter(AbstractRPCRouter):
             logger.error("User(email=%s) has bad credentials", user.email)
             raise AuthenticationError()
         access_token: str = self.token_service.get_access_token(user)
-        session = Session(user_id=user.id, email=user.email.lower(), fingerprint=data.fingerprint)
+        session = Session(user_id=user.id, email=user.email, fingerprint=data.fingerprint)
         session_id = await self.session_repository.setex(session)
         logger.info("Session created for User(email=%s)", user.email)
         response.set_cookie(
