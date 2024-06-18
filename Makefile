@@ -8,8 +8,8 @@ install-dev:
 install-prod:
 	poetry install --without dev
 
-run:
-	...
-
 build:
-	...
+	docker build . -t coworking_booking_api
+
+run:
+	docker run --env-file .env coworking_booking_api
